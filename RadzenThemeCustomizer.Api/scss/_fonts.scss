@@ -1,0 +1,8 @@
+$fonts-path: '../fonts';
+
+@font-face {
+    font-family: 'Material Symbols';
+    src: url('#{$fonts-path}/MaterialSymbolsOutlined.woff2') format('woff2 supports variations'), url('#{$fonts-path}/MaterialSymbolsOutlined.woff2') format('woff2-variations');
+    font-style: normal;
+    font-weight: 100 700;
+}

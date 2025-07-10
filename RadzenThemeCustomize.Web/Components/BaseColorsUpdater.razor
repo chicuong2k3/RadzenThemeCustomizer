@@ -1,0 +1,97 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@implements IDisposable
+
+<RadzenFieldset Text="Base Color Palette">
+    <RadzenRow>
+        <!-- Left Column: First half of Color Pickers and Alerts -->
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0">
+                @foreach (var color in baseColors.Take(baseColors.Count / 2))
+                {
+                    <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
+                        <RadzenColumn Size="6">
+                            <RadzenFormField Text="@($"{ToTitleCase(color.Key)} Color")" Style="width: 100%">
+                                <RadzenColorPicker @bind-Value="baseColors[color.Key]" ShowColors="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="6">
+                            <RadzenAlert class="@($"rz-background-color-{color.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{color.Key.Replace("rz-", "")}")" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+
+        <!-- Right Column: Second half of Color Pickers and Alerts -->
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0">
+                @foreach (var color in baseColors.Skip(baseColors.Count / 2))
+                {
+                    <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
+                        <RadzenColumn Size="6">
+                            <RadzenFormField Text="@($"{ToTitleCase(color.Key)} Color")" Style="width: 100%">
+                                <RadzenColorPicker @bind-Value="baseColors[color.Key]" ShowColors="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="6">
+                            <RadzenAlert class="@($"rz-background-color-{color.Key.Replace("rz-", "")}")"
+                                         Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{color.Key.Replace("rz-", "")}")" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenFieldset>
+
+@code {
+    private Dictionary<string, string> baseColors = new()
+    {
+        { "rz-base-50", string.Empty },
+        { "rz-base-100", string.Empty },
+        { "rz-base-200", string.Empty },
+        { "rz-base-300", string.Empty },
+        { "rz-base-400", string.Empty },
+        { "rz-base-500", string.Empty },
+        { "rz-base-600", string.Empty },
+        { "rz-base-700", string.Empty },
+        { "rz-base-800", string.Empty },
+        { "rz-base-900", string.Empty },
+        { "rz-base-light", string.Empty },
+        { "rz-base-lighter", string.Empty },
+        { "rz-base-dark", string.Empty },
+        { "rz-base-darker", string.Empty }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+    }
+
+    private async Task RefreshThemeState()
+    {
+        var keys = baseColors.Keys.ToList();
+        foreach (var key in keys)
+        {
+            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            baseColors[key] = value;
+        }
+    }
+
+    private string ToTitleCase(string input)
+    {
+        return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.Replace("rz-", "").Replace("-", " "));
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+
+    public Dictionary<string, string> GetBaseColors() => baseColors;
+
+}

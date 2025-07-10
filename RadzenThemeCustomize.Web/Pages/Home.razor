@@ -1,0 +1,29 @@
+﻿@page "/"
+@using RadzenThemeCustomizer.Web
+
+@inject LayoutEventService EventService
+
+<ThemeUpdater @ref="@themeUpdater" />
+
+@code {
+    private ThemeUpdater? themeUpdater;
+
+    protected override void OnInitialized()
+    {
+        EventService.OnChangeTheme += HandleApplyClicked;
+    }
+
+    private async Task HandleApplyClicked()
+    {
+        if (themeUpdater != null)
+        {
+            await themeUpdater.ChangeThemeAsync();
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= HandleApplyClicked;
+    }
+}

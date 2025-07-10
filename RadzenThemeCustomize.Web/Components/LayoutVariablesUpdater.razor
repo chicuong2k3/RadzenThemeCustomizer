@@ -1,0 +1,219 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject ThemeManagerService ThemeManagerService
+@inject ColorVariableService ColorVariableService
+@inject LayoutEventService EventService
+@implements IDisposable
+
+<RadzenFieldset Text="Layout & Typography Variables">
+    <RadzenRow>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="4px">
+                @foreach (var variable in layoutVariables.Take(4))
+                {
+                    <RadzenRow>
+                        <RadzenColumn Size="9">
+                            <RadzenFormField Text="@ToLabel(variable.Key)">
+                                @if (variable.Key == "rz-text-font-family")
+                                {
+                                    <RadzenTextBox @bind-Value="textFontFamily" />
+                                }
+                                else
+                                {
+                                    <RadzenNumeric @bind-Value="layoutVariables[variable.Key]" Min="0" />
+                                }
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="3">
+                            @if (variable.Key != "rz-text-font-family" && variable.Key != "rz-body-line-height")
+                            {
+                                <RadzenFormField Text="Unit">
+                                    @if (variable.Key == "rz-body-font-size")
+                                    {
+                                        <RadzenDropDown @bind-Value="unitVariables[variable.Key]" Data="@(new string[] { "px", "rem" })" />
+                                    }
+                                    else if (variable.Key == "rz-root-font-size" || variable.Key == "rz-border-width" || variable.Key == "rz-border-radius" || variable.Key == "rz-outline-offset" || variable.Key == "rz-outline-width")
+                                    {
+                                        <RadzenTextBox @bind-Value="unitVariables[variable.Key]" Disabled="true" />
+                                    }
+                                </RadzenFormField>
+                            }
+
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Outline Color Variable" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@outlineColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="4px">
+                @foreach (var variable in layoutVariables.Skip(4))
+                {
+                    <RadzenRow>
+                        <RadzenColumn Size="8">
+                            <RadzenFormField Text="@ToLabel(variable.Key)">
+                                @if (variable.Key == "rz-text-font-family")
+                                {
+                                    <RadzenTextBox @bind-Value="textFontFamily" />
+                                }
+                                else
+                                {
+                                    <RadzenNumeric @bind-Value="layoutVariables[variable.Key]" Min="0" />
+                                }
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="4">
+                            @if (variable.Key != "rz-text-font-family" && variable.Key != "rz-body-line-height")
+                            {
+                                <RadzenFormField Text="Unit">
+                                    @if (variable.Key == "rz-body-font-size")
+                                    {
+                                        <RadzenDropDown @bind-Value="unitVariables[variable.Key]" Data="@(new string[] { "px", "rem" })" />
+                                    }
+                                    else if (variable.Key == "rz-root-font-size" || variable.Key == "rz-border-width" || variable.Key == "rz-border-radius" || variable.Key == "rz-outline-offset" || variable.Key == "rz-outline-width")
+                                    {
+                                        <RadzenTextBox @bind-Value="unitVariables[variable.Key]" Disabled="true" />
+                                    }
+                                </RadzenFormField>
+                            }
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Body Background Color Variable" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@bodyBackgroundColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenFieldset>
+
+@code {
+    private Dictionary<string, double> layoutVariables = new()
+    {
+        { "rz-border-width", 0 },
+        { "rz-border-radius", 0 },
+        { "rz-root-font-size", 0 },
+        { "rz-body-font-size", 0 },
+        { "rz-body-line-height", 0 },
+        { "rz-text-font-family", 0 },
+        { "rz-outline-offset", 0 },
+        { "rz-outline-width", 0 },
+    };
+
+    private Dictionary<string, string> unitVariables = new()
+    {
+        { "rz-border-width", "px" },
+        { "rz-border-radius", "px" },
+        { "rz-root-font-size", "px" },
+        { "rz-body-font-size", "rem" },
+        { "rz-body-line-height", "" },
+        { "rz-text-font-family", "" },
+        { "rz-outline-offset", "px" },
+        { "rz-outline-width", "px" },
+    };
+
+    private string textFontFamily = "";
+
+    private string outlineColorVariable = "";
+    private string bodyBackgroundColorVariable = "";
+    private List<VariableOption> availableVariables = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshThemeState()
+    {
+        try
+        {
+            availableVariables = ColorVariableService.GetColorVariables();
+            var keys = layoutVariables.Keys.ToList();
+            foreach (var key in keys)
+            {
+                var value = await ThemeManagerService.GetScssVariableAsync(key);
+                if (key == "rz-text-font-family")
+                {
+                    textFontFamily = value ?? "";
+                    layoutVariables[key] = 0;
+                    unitVariables[key] = "";
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var numericPart = System.Text.RegularExpressions.Regex.Replace(value, "[^0-9.]", "");
+                    var unitPart = System.Text.RegularExpressions.Regex.Match(value, "[a-zA-Z]+$")?.Value ?? "px";
+                    if (double.TryParse(numericPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var number))
+                    {
+                        layoutVariables[key] = number;
+                        unitVariables[key] = (key == "rz-root-font-size" || key == "rz-body-font-size") ? (unitPart == "px" || unitPart == "rem" ? unitPart : "rem") : (key == "rz-body-line-height" ? "" : "px");
+                    }
+                }
+            }
+
+            var outlineColorValue = await ThemeManagerService.GetScssVariableAsync("rz-outline-color") ?? "";
+            outlineColorVariable = outlineColorValue.Substring(6, outlineColorValue.Length - 7);
+
+            var bodyBackgroundColorValue = await ThemeManagerService.GetScssVariableAsync("rz-body-background-color") ?? "";
+            bodyBackgroundColorVariable = bodyBackgroundColorValue.Substring(6, bodyBackgroundColorValue.Length - 7);
+
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private string ToLabel(string variableKey)
+    {
+        return System.Globalization.CultureInfo.CurrentCulture.TextInfo
+            .ToTitleCase(variableKey.Replace("rz-", "").Replace("-", " "));
+    }
+
+    public Dictionary<string, string> GetLayoutVariables()
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var key in layoutVariables.Keys)
+        {
+            if (key == "rz-text-font-family")
+            {
+                result[key] = textFontFamily;
+                continue;
+            }
+            var value = layoutVariables[key];
+            var unit = unitVariables[key];
+            result[key] = unit == "" ? value.ToString("0.###") : $"{value.ToString("0.###")}{unit}";
+        }
+
+
+        result["rz-outline-color"] = $"var(--{outlineColorVariable})";
+        result["rz-body-background-color"] = $"var(--{bodyBackgroundColorVariable})";
+
+        return result;
+    }
+
+    void IDisposable.Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+}

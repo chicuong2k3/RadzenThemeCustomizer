@@ -1,0 +1,338 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@implements IDisposable
+
+<RadzenFieldset Text="Shadow Variables">
+    <RadzenRow Gap="8px">
+        @for (int i = 0; i < 4; i++)
+        {
+            var shadowsToDisplay = shadowVariables.Skip(i * 3).Take(i == 3 ? 2 : 3).ToList();
+            if (shadowsToDisplay.Any())
+            {
+                <RadzenColumn Size="12" SizeMD="3">
+                    <RadzenStack>
+                        @foreach (var shadow in shadowsToDisplay)
+                        {
+                            <RadzenCard>
+                                <RadzenStack Gap="0.5rem">
+                                    <RadzenText TextStyle="TextStyle.Subtitle2">@ToLabel(shadow.Key)</RadzenText>
+                                    @if (shadow.Key == "rz-shadow-inset-level-1")
+                                    {
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Offset X" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-offset-x"]" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Offset Y" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-offset-y"]" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Blur Radius" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-blur-radius"]" Min="0" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="12">
+                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined">
+                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" ShowAlpha="true" Change="@(color => OnColorChanged(shadow.Key, color))" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    }
+                                    else
+                                    {
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Offset X" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-offset-x"]" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Offset Y" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-offset-y"]" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Blur Radius" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-blur-radius"]" Min="0" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="9">
+                                                <RadzenFormField Text="Spread Radius" Variant="Variant.Outlined">
+                                                    <RadzenNumeric @bind-Value="@shadowNumericVariables[$"{shadow.Key}-spread-radius"]" Step="1" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                                    <RadzenTextBox Value="px" ReadOnly="true" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow>
+                                            <RadzenColumn Size="12">
+                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined">
+                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" ShowAlpha="true" Change="@(color => OnColorChanged(shadow.Key, color))" />
+                                                </RadzenFormField>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    }
+                                    <RadzenCard Style="@GetPreviewStyle(shadow.Key)">
+                                        <RadzenText TextStyle="TextStyle.Subtitle2">.@shadow.Key</RadzenText>
+                                    </RadzenCard>
+                                </RadzenStack>
+                            </RadzenCard>
+                        }
+                    </RadzenStack>
+                </RadzenColumn>
+            }
+        }
+    </RadzenRow>
+</RadzenFieldset>
+
+@code {
+    private Dictionary<string, string> shadowVariables = new()
+    {
+        { "rz-shadow-1", "0 2px 2px 0 rgba(0, 0, 0, 0.08), 0px 0px 2px 0px rgba(183, 56, 56, 1)" },
+        { "rz-shadow-2", "0 0 2px 0 rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.08), 0px 4px 12px 0 rgba(0, 0, 0, 0.04)" },
+        { "rz-shadow-3", "0 0 4px 0 rgba(0, 0, 0, 0.04), 0px 2px 4px rgba(0, 0, 0, 0.04), 0px 4px 16px rgba(0, 0, 0, 0.10)" },
+        { "rz-shadow-4", "0 0 4px 0 rgba(0, 0, 0, 0.04), 0px 3px 5px rgba(0, 0, 0, 0.04), 0px 8px 20px rgba(0, 0, 0, 0.11)" },
+        { "rz-shadow-5", "0 0 6px 0 rgba(0, 0, 0, 0.04), 0px 4px 6px rgba(0, 0, 0, 0.04), 0px 12px 24px rgba(0, 0, 0, 0.12)" },
+        { "rz-shadow-6", "0 0 6px 0 rgba(0, 0, 0, 0.04), 0px 5px 8px rgba(0, 0, 0, 0.04), 0px 14px 28px rgba(0, 0, 0, 0.13)" },
+        { "rz-shadow-7", "0 0 8px 0 rgba(0, 0, 0, 0.04), 0px 6px 10px rgba(0, 0, 0, 0.04), 0px 16px 32px rgba(0, 0, 0, 0.14)" },
+        { "rz-shadow-8", "0 0 8px 0 rgba(0, 0, 0, 0.04), 0px 7px 12px rgba(0, 0, 0, 0.04), 0px 18px 40px rgba(0, 0, 0, 0.15)" },
+        { "rz-shadow-9", "0 0 12px 0 rgba(0, 0, 0, 0.04), 0px 8px 16px rgba(0, 0, 0, 0.04), 0px 20px 48px rgba(0, 0, 0, 0.16)" },
+        { "rz-shadow-10", "0 0 12px 0 rgba(0, 0, 0, 0.04), 0px 9px 20px rgba(0, 0, 0, 0.04), 0px 22px 64px rgba(0, 0, 0, 0.20)" },
+        { "rz-shadow-inset-level-1", "inset 0px 0px 2px rgba(0, 0, 0, 0.2)" }
+    };
+
+    private Dictionary<string, double> shadowNumericVariables = new()
+    {
+        { "rz-shadow-1-offset-x", 0 }, { "rz-shadow-1-offset-y", 0 }, { "rz-shadow-1-blur-radius", 2 }, { "rz-shadow-1-spread-radius", 0 },
+        { "rz-shadow-2-offset-x", 0 }, { "rz-shadow-2-offset-y", 4 }, { "rz-shadow-2-blur-radius", 12 }, { "rz-shadow-2-spread-radius", 0 },
+        { "rz-shadow-3-offset-x", 0 }, { "rz-shadow-3-offset-y", 4 }, { "rz-shadow-3-blur-radius", 16 }, { "rz-shadow-3-spread-radius", 0 },
+        { "rz-shadow-4-offset-x", 0 }, { "rz-shadow-4-offset-y", 8 }, { "rz-shadow-4-blur-radius", 20 }, { "rz-shadow-4-spread-radius", 0 },
+        { "rz-shadow-5-offset-x", 0 }, { "rz-shadow-5-offset-y", 12 }, { "rz-shadow-5-blur-radius", 24 }, { "rz-shadow-5-spread-radius", 0 },
+        { "rz-shadow-6-offset-x", 0 }, { "rz-shadow-6-offset-y", 14 }, { "rz-shadow-6-blur-radius", 28 }, { "rz-shadow-6-spread-radius", 0 },
+        { "rz-shadow-7-offset-x", 0 }, { "rz-shadow-7-offset-y", 16 }, { "rz-shadow-7-blur-radius", 32 }, { "rz-shadow-7-spread-radius", 0 },
+        { "rz-shadow-8-offset-x", 0 }, { "rz-shadow-8-offset-y", 18 }, { "rz-shadow-8-blur-radius", 40 }, { "rz-shadow-8-spread-radius", 0 },
+        { "rz-shadow-9-offset-x", 0 }, { "rz-shadow-9-offset-y", 20 }, { "rz-shadow-9-blur-radius", 48 }, { "rz-shadow-9-spread-radius", 0 },
+        { "rz-shadow-10-offset-x", 0 }, { "rz-shadow-10-offset-y", 22 }, { "rz-shadow-10-blur-radius", 64 }, { "rz-shadow-10-spread-radius", 0 },
+        { "rz-shadow-inset-level-1-offset-x", 0 }, { "rz-shadow-inset-level-1-offset-y", 0 }, { "rz-shadow-inset-level-1-blur-radius", 2 }
+    };
+
+    private Dictionary<string, string> colorValues = new();
+
+    public ShadowUpdater()
+    {
+        // Initialize colorValues synchronously for all shadow keys
+        foreach (var key in shadowVariables.Keys)
+        {
+            colorValues[key] = "rgba(0, 0, 0, 0.08)";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+    }
+
+    private async Task RefreshThemeState()
+    {
+
+        foreach (var key in shadowVariables.Keys)
+        {
+            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            if (string.IsNullOrEmpty(value))
+            {
+                continue;
+            }
+
+            value = value.Trim().Replace("\r\n", "").Replace("\n", "");
+
+            if (key == "rz-shadow-inset-level-1")
+            {
+                var match = Regex.Match(value, @"inset\s+([\d.-]+)px\s+([\d.-]+)px\s+([\d.]+)px\s+rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\)");
+                if (match.Success)
+                {
+                    if (double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var offsetX))
+                        shadowNumericVariables[$"{key}-offset-x"] = offsetX;
+                    if (double.TryParse(match.Groups[2].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var offsetY))
+                        shadowNumericVariables[$"{key}-offset-y"] = offsetY;
+                    if (double.TryParse(match.Groups[3].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var blurRadius))
+                        shadowNumericVariables[$"{key}-blur-radius"] = blurRadius;
+                    if (double.TryParse(match.Groups[7].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var opacity))
+                    {
+                        if (double.TryParse(match.Groups[4].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var r) &&
+                            double.TryParse(match.Groups[5].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var g) &&
+                            double.TryParse(match.Groups[6].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var b))
+                        {
+                            colorValues[key] = $"rgba({r:F0},{g:F0},{b:F0},{opacity:F2})";
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var layerMatches = Regex.Matches(value, @"([\d.-]+(?:px)?\s+[\d.-]+(?:px)?\s+[\d.-]+(?:px)?(?:\s+[\d.-]+(?:px)?)?\s+rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\))(?=(?:,\s|$))");
+                var layers = layerMatches.Select(m => m.Groups[1].Value.Trim()).ToList();
+                if (layers.Any())
+                {
+                    var lastLayer = layers.Last();
+                    var match = Regex.Match(lastLayer, @"([\d.-]+)(?:px)?\s+([\d.-]+)(?:px)?\s+([\d.-]+)(?:px)?(?:\s+([\d.-]+)(?:px)?)?\s+rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\)");
+                    if (match.Success)
+                    {
+                        if (double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var offsetX))
+                            shadowNumericVariables[$"{key}-offset-x"] = offsetX;
+                        if (double.TryParse(match.Groups[2].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var offsetY))
+                            shadowNumericVariables[$"{key}-offset-y"] = offsetY;
+                        if (double.TryParse(match.Groups[3].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var blurRadius))
+                            shadowNumericVariables[$"{key}-blur-radius"] = blurRadius;
+                        if (match.Groups.Count > 4 && double.TryParse(match.Groups[4].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var spreadRadius))
+                            shadowNumericVariables[$"{key}-spread-radius"] = spreadRadius;
+                        if (double.TryParse(match.Groups[8].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var opacity))
+                        {
+                            if (double.TryParse(match.Groups[5].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var r) &&
+                                double.TryParse(match.Groups[6].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var g) &&
+                                double.TryParse(match.Groups[7].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var b))
+                            {
+                                colorValues[key] = $"rgba({r:F0},{g:F0},{b:F0},{opacity:F2})";
+                            }
+                        }
+                    }
+                }
+            }
+            shadowVariables[key] = value;
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnColorChanged(string shadowKey, string color)
+    {
+        if (!string.IsNullOrEmpty(color))
+        {
+            colorValues[shadowKey] = color; // RadzenColorPicker with ShowAlpha="true" returns rgba
+        }
+    }
+
+    private string ToLabel(string key)
+    {
+        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key.Replace("rz-shadow-", "Shadow ").Replace("inset-level-", "Inset Level "));
+    }
+
+    private string GetPreviewStyle(string shadowKey)
+    {
+        var rgba = colorValues.ContainsKey(shadowKey) ? colorValues[shadowKey] : "rgba(0, 0, 0, 0.08)";
+        if (shadowKey == "rz-shadow-inset-level-1")
+        {
+            var offsetX = shadowNumericVariables[$"{shadowKey}-offset-x"];
+            var offsetY = shadowNumericVariables[$"{shadowKey}-offset-y"];
+            var blurRadius = shadowNumericVariables[$"{shadowKey}-blur-radius"];
+            return $"box-shadow: inset {offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {rgba};";
+        }
+        else
+        {
+            var offsetX = shadowNumericVariables[$"{shadowKey}-offset-x"];
+            var offsetY = shadowNumericVariables[$"{shadowKey}-offset-y"];
+            var blurRadius = shadowNumericVariables[$"{shadowKey}-blur-radius"];
+            var spreadRadius = shadowNumericVariables[$"{shadowKey}-spread-radius"];
+            var originalValue = shadowVariables[shadowKey];
+            var layerMatches = Regex.Matches(originalValue, @"([\d.-]+(?:px)?\s+[\d.-]+(?:px)?\s+[\d.-]+(?:px)?(?:\s+[\d.-]+(?:px)?)?\s+rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\))(?=(?:,\s|$))");
+            var layers = layerMatches.Select(m => m.Groups[1].Value.Trim()).ToList();
+            if (layers.Any())
+            {
+                var newLayers = layers.Select(_ => $"{offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {spreadRadius:F2}px {rgba}").ToList();
+                return $"box-shadow: {string.Join(", ", newLayers)};";
+            }
+            return $"box-shadow: {offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {spreadRadius:F2}px {rgba};";
+        }
+    }
+
+    public Dictionary<string, string> GetShadowVariables()
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var key in shadowVariables.Keys)
+        {
+            var rgba = colorValues.ContainsKey(key) ? colorValues[key] : "rgba(0, 0, 0, 0.08)";
+            if (key == "rz-shadow-inset-level-1")
+            {
+                var offsetX = shadowNumericVariables[$"{key}-offset-x"];
+                var offsetY = shadowNumericVariables[$"{key}-offset-y"];
+                var blurRadius = shadowNumericVariables[$"{key}-blur-radius"];
+                result[key] = $"inset {offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {rgba}";
+            }
+            else
+            {
+                var offsetX = shadowNumericVariables[$"{key}-offset-x"];
+                var offsetY = shadowNumericVariables[$"{key}-offset-y"];
+                var blurRadius = shadowNumericVariables[$"{key}-blur-radius"];
+                var spreadRadius = shadowNumericVariables[$"{key}-spread-radius"];
+                var originalValue = shadowVariables[key];
+                var layerMatches = Regex.Matches(originalValue, @"([\d.-]+(?:px)?\s+[\d.-]+(?:px)?\s+[\d.-]+(?:px)?(?:\s+[\d.-]+(?:px)?)?\s+rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\))(?=(?:,\s|$))");
+                var layers = layerMatches.Select(m => m.Groups[1].Value.Trim()).ToList();
+                if (layers.Any())
+                {
+                    var newLayers = layers.Select(_ => $"{offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {spreadRadius:F2}px {rgba}").ToList();
+                    result[key] = string.Join(", ", newLayers);
+                }
+                else
+                {
+                    result[key] = $"{offsetX:F2}px {offsetY:F2}px {blurRadius:F2}px {spreadRadius:F2}px {rgba}";
+                }
+            }
+        }
+        return result;
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+}

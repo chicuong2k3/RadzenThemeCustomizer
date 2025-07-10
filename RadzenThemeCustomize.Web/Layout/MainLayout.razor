@@ -1,0 +1,110 @@
+﻿@inherits LayoutComponentBase
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@using Radzen.Blazor.Rendering
+@using RadzenThemeCustomizer.Web
+
+
+<HeadContent>
+    <RadzenTheme Theme="material" />
+</HeadContent>
+
+<RadzenComponents />
+
+<RadzenLayout>
+    <RadzenHeader Style="padding: 16px; box-shadow: none;">
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
+                <RadzenDropDown Disabled="@isApplied" Placeholder="Pick a theme to build upon" Value="@selectedTheme" TextProperty="Name" ValueChanged="@((ThemeOption theme) => OnThemeChanged(theme))" Data="@predefinedThemes" />
+                <RadzenButton Disabled="@(isApplied || selectedTheme == null)" Click="ResetTheme">Use theme</RadzenButton>
+                <RadzenButton Disabled="@(!isApplied)" Click="Clear">Clear</RadzenButton>
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
+                <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
+                <RadzenButton Click="ChangeTheme">Apply</RadzenButton>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenBody>
+        @Body
+    </RadzenBody>
+</RadzenLayout>
+
+
+
+
+@code {
+    private ThemeOption? selectedTheme = null;
+    private bool isApplied = false;
+
+    private List<ThemeOption> predefinedThemes = [
+        new ThemeOption { Name = "Material", Value = "material"},
+        new ThemeOption { Name = "Material Dark", Value = "material-dark"},
+        new ThemeOption { Name = "Humanistic", Value = "humanistic"},
+        new ThemeOption { Name = "Humanistic Dark", Value = "humanistic-dark"},
+        new ThemeOption { Name = "Software", Value = "software"},
+        new ThemeOption { Name = "Software Dark", Value = "software-dark"},
+        new ThemeOption { Name = "Standard", Value = "standard"},
+        new ThemeOption { Name = "Standard Dark", Value = "standard-dark"},
+        new ThemeOption { Name = "Default", Value = "default"},
+        new ThemeOption { Name = "Default Dark", Value = "dark"}
+    ];
+
+    private async Task ChangeTheme()
+    {
+        await EventService.TriggerChangeTheme();
+        StateHasChanged();
+    }
+
+    private async Task ResetTheme()
+    {
+        if (selectedTheme == null)
+        {
+            return;
+        }
+
+        await ThemeManagerService.ResetThemeAsync(selectedTheme.Value);
+        string css = await ThemeManagerService.GetThemeCssAsync();
+
+        await JSRuntime.InvokeVoidAsync("injectCss", css);
+        await EventService.TriggerChangeTheme();
+        isApplied = true;
+        StateHasChanged();
+    }
+
+    private void OnThemeChanged(ThemeOption theme)
+    {
+        selectedTheme = theme;
+    }
+
+    private void DownloadCss()
+    {
+        NavigationManager.NavigateTo($"download/css", true);
+    }
+
+    private async Task Clear()
+    {
+        var ok = await DialogService.Confirm("This action will clear all current theme settings and reset them to default. Are you sure you want to continue?", "Clear theme");
+
+        if (ok == true)
+        {
+            await ThemeManagerService.ResetThemeAsync(predefinedThemes[0].Value);
+            string css = await ThemeManagerService.GetThemeCssAsync();
+
+            await JSRuntime.InvokeVoidAsync("injectCss", css);
+            await EventService.TriggerChangeTheme();
+            selectedTheme = predefinedThemes[0];
+            isApplied = false;
+            StateHasChanged();
+        }
+    }
+
+    public class ThemeOption
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
+}

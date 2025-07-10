@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36109.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadzenThemeCustomizer.Web", "RadzenThemeCustomize.Web\RadzenThemeCustomizer.Web.csproj", "{26093967-03AE-46BC-8DCC-11951F31F894}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadzenThemeCustomizer.Api", "RadzenThemeCustomizer.Api\RadzenThemeCustomizer.Api.csproj", "{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Debug|x86.Build.0 = Debug|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Release|x86.ActiveCfg = Release|x86
+		{26093967-03AE-46BC-8DCC-11951F31F894}.Release|x86.Build.0 = Release|x86
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ACBC09A2-B9F5-4B0A-9F37-88B3087A7243}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,96 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@implements IDisposable
+
+<RadzenFieldset Text="Series Color Palette">
+    <RadzenRow>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0">
+                @foreach (var kvp in GetSeriesColors().Take(8))
+                {
+                    <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
+                        <RadzenColumn Size="6">
+                            <RadzenFormField Text="@($"{kvp.Key.Replace("rz-", "").Replace("series-", "Series ")} Color")" Style="width: 100%">
+                                <RadzenColorPicker @bind-Value="@seriesColors[kvp.Key]" ShowColors="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="6">
+                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+
+        <!-- Second Column: Next 8 Color Pickers and Alerts -->
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0">
+                @foreach (var kvp in GetSeriesColors().Skip(8).Take(8))
+                {
+                    <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
+                        <RadzenColumn Size="6">
+                            <RadzenFormField Text="@($"{kvp.Key.Replace("rz-", "").Replace("series-", "Series ")} Color")" Style="width: 100%">
+                                <RadzenColorPicker @bind-Value="@seriesColors[kvp.Key]" ShowColors="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="6">
+                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+
+        <!-- Third Column: Last 8 Color Pickers and Alerts -->
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0">
+                @foreach (var kvp in GetSeriesColors().Skip(16).Take(8))
+                {
+                    <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
+                        <RadzenColumn Size="6">
+                            <RadzenFormField Text="@($"{kvp.Key.Replace("rz-", "").Replace("series-", "Series ")} Color")" Style="width: 100%">
+                                <RadzenColorPicker @bind-Value="@seriesColors[kvp.Key]" ShowColors="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="6">
+                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenFieldset>
+
+
+@code {
+
+    private Dictionary<string, string> seriesColors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+    }
+
+    private async Task RefreshThemeState()
+    {
+        for (int i = 1; i <= 24; i++)
+        {
+            var key = $"rz-series-{i}";
+            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            seriesColors[key] = value;
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+
+    public Dictionary<string, string> GetSeriesColors() => seriesColors;
+}

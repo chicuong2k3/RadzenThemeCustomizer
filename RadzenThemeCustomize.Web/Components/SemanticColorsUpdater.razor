@@ -1,0 +1,208 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@inject ColorVariableService ColorVariableService
+@inject LayoutEventService EventService
+@implements IDisposable
+
+<RadzenFieldset Text="Semantic Colors">
+    <RadzenRow>
+        <RadzenColumn Size="6">
+            <RadzenStack Gap="4px">
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Title Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textTitleColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Secondary Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textSecondaryColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Tertiary Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textTertiaryColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Disabled Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textDisabledColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenStack Gap="4px">
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Text Contrast Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@textContrastColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Border Hover Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@borderHoverColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Border Normal Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@borderNormalColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Border Focus Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@borderFocusColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Border Disabled Color" Style="width: 100%">
+                            <RadzenDropDown @bind-Value="@borderDisabledColorVariable"
+                                            Data="@availableVariables"
+                                            TextProperty="DisplayName"
+                                            ValueProperty="VariableName" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenFieldset>
+
+@code {
+    private string textTitleColorVariable = "";
+    private string textColorVariable = "";
+    private string textSecondaryColorVariable = "";
+    private string textTertiaryColorVariable = "";
+    private string textDisabledColorVariable = "";
+    private string textContrastColorVariable = "";
+    private string borderNormalColorVariable = "";
+    private string borderHoverColorVariable = "";
+    private string borderFocusColorVariable = "";
+    private string borderDisabledColorVariable = "";
+
+    private List<VariableOption> availableVariables = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+    }
+
+    private async Task RefreshThemeState()
+    {
+        availableVariables = ColorVariableService.GetColorVariables();
+
+        textTitleColorVariable = await GetVariableNameAsync("rz-text-title-color") ?? textTitleColorVariable;
+        textColorVariable = await GetVariableNameAsync("rz-text-color") ?? textColorVariable;
+        textSecondaryColorVariable = await GetVariableNameAsync("rz-text-secondary-color") ?? textSecondaryColorVariable;
+        textTertiaryColorVariable = await GetVariableNameAsync("rz-text-tertiary-color") ?? textTertiaryColorVariable;
+        textDisabledColorVariable = await GetVariableNameAsync("rz-text-disabled-color") ?? textDisabledColorVariable;
+        textContrastColorVariable = await GetVariableNameAsync("rz-text-contrast-color") ?? textContrastColorVariable;
+        borderNormalColorVariable = await GetBorderColorVariableNameAsync("rz-border-normal") ?? borderNormalColorVariable;
+        borderHoverColorVariable = await GetBorderColorVariableNameAsync("rz-border-hover") ?? borderHoverColorVariable;
+        borderFocusColorVariable = await GetBorderColorVariableNameAsync("rz-border-focus") ?? borderFocusColorVariable;
+        borderDisabledColorVariable = await GetBorderColorVariableNameAsync("rz-border-disabled") ?? borderDisabledColorVariable;
+
+        StateHasChanged();
+    }
+
+    private async Task<string?> GetVariableNameAsync(string scssVariable)
+    {
+        var value = await ThemeManagerService.GetScssVariableAsync(scssVariable) ?? "";
+        if (value.Contains("var(--"))
+        {
+            var startIndex = value.IndexOf("var(--") + 6;
+            var endIndex = value.IndexOf(")", startIndex);
+            if (endIndex > startIndex)
+            {
+                return value.Substring(startIndex, endIndex - startIndex);
+            }
+        }
+        return null;
+    }
+
+    private async Task<string?> GetBorderColorVariableNameAsync(string scssVariable)
+    {
+        var value = await ThemeManagerService.GetScssVariableAsync(scssVariable) ?? "";
+        var match = Regex.Match(value, @"var\(--([a-zA-Z0-9-]+)\)[^var]*$");
+        if (match.Success)
+        {
+            return match.Groups[1].Value;
+        }
+        return null;
+    }
+
+    public Dictionary<string, string> GetSemanticColors()
+    {
+        return new Dictionary<string, string>
+        {
+            { "rz-text-title-color", $"var(--{textTitleColorVariable})" },
+            { "rz-text-color", $"var(--{textColorVariable})" },
+            { "rz-text-secondary-color", $"var(--{textSecondaryColorVariable})" },
+            { "rz-text-tertiary-color", $"var(--{textTertiaryColorVariable})" },
+            { "rz-text-disabled-color", $"var(--{textDisabledColorVariable})" },
+            { "rz-text-contrast-color", $"var(--{textContrastColorVariable})" },
+            { "rz-border-normal", $"var(--rz-border-width) solid var(--{borderNormalColorVariable})" },
+            { "rz-border-hover", $"var(--rz-border-width) solid var(--{borderHoverColorVariable})" },
+            { "rz-border-focus", $"var(--rz-border-width) solid var(--{borderFocusColorVariable})" },
+            { "rz-border-disabled", $"var(--rz-border-width) solid var(--{borderDisabledColorVariable})" }
+        };
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+}

@@ -1,0 +1,318 @@
+﻿@using RadzenThemeCustomizer.Web
+@inject LayoutEventService EventService
+@inject ThemeManagerService ThemeManagerService
+@implements IDisposable
+
+<RadzenStack Gap="1rem">
+
+    <!-- Spacing and Size Variables -->
+    <RadzenFieldset Text="Spacing and Size Variables">
+        <RadzenRow Gap="8px">
+            @foreach (var key in spacingSizeKeys)
+            {
+                <RadzenColumn Size="3">
+                    <RadzenCard>
+                        <RadzenStack Gap="0.5rem">
+                            <RadzenText TextStyle="TextStyle.Subtitle2">@ToLabel(key)</RadzenText>
+                            <RadzenRow>
+                                <RadzenColumn Size="9">
+                                    <RadzenFormField Text="Value" Variant="Variant.Outlined">
+                                        <RadzenNumeric @bind-Value="@numericVariables[key]" Min="0" Step="0.125" />
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                                <RadzenColumn Size="3">
+                                    <RadzenFormField Text="Unit" Variant="Variant.Outlined">
+                                        <RadzenDropDown Data="@units" @bind-Value="@unitVariables[key]" Change="@(() => OnUnitChanged(key))" />
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            @if (key.Contains("border-radius") || key.Contains("font-size") || key.Contains("line-height"))
+                            {
+                                <RadzenCard Style="@GetPreviewStyle(key)">
+                                    <RadzenText TextStyle="TextStyle.Subtitle2">Preview</RadzenText>
+                                </RadzenCard>
+                            }
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            }
+        </RadzenRow>
+    </RadzenFieldset>
+
+    <!-- Opacity Variables -->
+    <RadzenFieldset Text="Opacity Variables">
+        <RadzenRow Gap="8px">
+            @foreach (var key in opacityKeys)
+            {
+                <RadzenColumn Size="3">
+                    <RadzenCard>
+                        <RadzenStack Gap="0.5rem">
+                            <RadzenText TextStyle="TextStyle.Subtitle2">@ToLabel(key)</RadzenText>
+                            <RadzenRow>
+                                <RadzenColumn Size="12">
+                                    <RadzenFormField Text="Opacity" Variant="Variant.Outlined">
+                                        <RadzenNumeric @bind-Value="@numericVariables[key]" Min="0" Max="1" Step="0.01" />
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            }
+        </RadzenRow>
+    </RadzenFieldset>
+
+    <!-- Shadow Variables (Simplified) -->
+    <RadzenFieldset Text="Shadow Variables">
+        <RadzenRow Gap="8px">
+            @foreach (var key in shadowKeys)
+            {
+                <RadzenColumn Size="4">
+                    <RadzenCard>
+                        <RadzenStack Gap="0.5rem">
+                            <RadzenText TextStyle="TextStyle.Subtitle2">@ToLabel(key)</RadzenText>
+                            <RadzenRow>
+                                <RadzenColumn Size="12">
+                                    <RadzenFormField Text="Enable Shadow" Variant="Variant.Outlined">
+                                        <RadzenSwitch @bind-Value="@enableShadow[key]" Change="@(() => OnShadowToggleChanged(key))" />
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            @if (enableShadow[key])
+                            {
+                                <RadzenRow>
+                                    <RadzenColumn Size="12">
+                                        <RadzenFormField Text="Shadow Value" Variant="Variant.Outlined">
+                                            <RadzenTextBox @bind-Value="@themeVariables[key]" />
+                                        </RadzenFormField>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            }
+                            <RadzenCard Style="@($"box-shadow: {themeVariables[key]};")">
+                                <RadzenText TextStyle="TextStyle.Subtitle2">Preview</RadzenText>
+                            </RadzenCard>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            }
+        </RadzenRow>
+    </RadzenFieldset>
+</RadzenStack>
+
+
+@code {
+    private Dictionary<string, string> themeVariables = new()
+    {
+        { "input-focus-shadow", "0px 0px 0px 1px var(--rz-white), 0px 0px 0px 3px rgba(var(--rz-primary), 0.2)" },
+        { "button-focus-shadow", "none" },
+        { "input-shadow", "none" },
+        { "checkbox-checked-shadow", "none" },
+        { "radio-checked-hover-shadow", "none" },
+        { "radio-circle-shadow", "none" },
+        { "rz-outline-color", "var(--rz-primary-light)" },
+        { "rz-carousel-pager-gap", "0.75rem" },
+        { "grid-border-radius", "0" },
+        { "grid-header-font-size", "0.875rem" },
+        { "datepicker-header-padding-block", "0.5rem" },
+        { "datepicker-header-padding-inline", "0.5rem" },
+        { "datepicker-calendar-padding-block", "0 0.5rem" },
+        { "datepicker-calendar-padding-inline", "0.5rem" },
+        { "slider-handle-width", "1.25rem" },
+        { "slider-handle-height", "1.25rem" },
+        { "checkbox-border-width", "1px" },
+        { "checkbox-icon-width", "1rem" },
+        { "checkbox-icon-font-size", "1rem" },
+        { "radio-icon-width", "0.625rem" },
+        { "colorpicker-value-border-radius", "1rem" },
+        { "colorpicker-item-border-radius", "1rem" },
+        { "input-disabled-opacity", "0.5" },
+        { "rating-disabled-opacity", "0.5" },
+        { "dialog-title-padding-block", "1.25rem 0.5rem" },
+        { "dialog-title-padding-inline", "1.25rem" },
+        { "dialog-title-font-size", "1.5rem" },
+        { "dialog-title-line-height", "1.25em" }
+    };
+
+    private Dictionary<string, double> numericVariables = new()
+    {
+        { "rz-carousel-pager-gap", 0.75 },
+        { "grid-border-radius", 0 },
+        { "grid-header-font-size", 0.875 },
+        { "datepicker-header-padding-block", 0.5 },
+        { "datepicker-header-padding-inline", 0.5 },
+        { "datepicker-calendar-padding-block", 0.5 },
+        { "datepicker-calendar-padding-inline", 0.5 },
+        { "slider-handle-width", 1.25 },
+        { "slider-handle-height", 1.25 },
+        { "checkbox-border-width", 1 },
+        { "checkbox-icon-width", 1 },
+        { "checkbox-icon-font-size", 1 },
+        { "radio-icon-width", 0.625 },
+        { "colorpicker-value-border-radius", 1 },
+        { "colorpicker-item-border-radius", 1 },
+        { "input-disabled-opacity", 0.5 },
+        { "rating-disabled-opacity", 0.5 },
+        { "dialog-title-padding-block", 1.25 },
+        { "dialog-title-padding-inline", 1.25 },
+        { "dialog-title-font-size", 1.5 },
+        { "dialog-title-line-height", 1.25 }
+    };
+
+    private Dictionary<string, bool> enableShadow = new()
+    {
+        { "input-focus-shadow", true },
+        { "button-focus-shadow", false },
+        { "input-shadow", false },
+        { "checkbox-checked-shadow", false },
+        { "radio-checked-hover-shadow", false },
+        { "radio-circle-shadow", false }
+    };
+
+    private Dictionary<string, string> unitVariables = new()
+    {
+        { "rz-carousel-pager-gap", "rem" },
+        { "grid-border-radius", "px" },
+        { "grid-header-font-size", "rem" },
+        { "datepicker-header-padding-block", "rem" },
+        { "datepicker-header-padding-inline", "rem" },
+        { "datepicker-calendar-padding-block", "rem" },
+        { "datepicker-calendar-padding-inline", "rem" },
+        { "slider-handle-width", "rem" },
+        { "slider-handle-height", "rem" },
+        { "checkbox-border-width", "px" },
+        { "checkbox-icon-width", "rem" },
+        { "checkbox-icon-font-size", "rem" },
+        { "radio-icon-width", "rem" },
+        { "colorpicker-value-border-radius", "rem" },
+        { "colorpicker-item-border-radius", "rem" },
+        { "dialog-title-padding-block", "rem" },
+        { "dialog-title-padding-inline", "rem" },
+        { "dialog-title-font-size", "rem" },
+        { "dialog-title-line-height", "em" }
+    };
+
+    private List<string> units = new() { "px", "rem", "em" };
+    private List<string> shadowKeys = new() { "input-focus-shadow", "button-focus-shadow", "input-shadow", "checkbox-checked-shadow", "radio-checked-hover-shadow", "radio-circle-shadow" };
+    private List<string> spacingSizeKeys = new() { "rz-carousel-pager-gap", "grid-border-radius", "grid-header-font-size", "datepicker-header-padding-block", "datepicker-header-padding-inline", "datepicker-calendar-padding-block", "datepicker-calendar-padding-inline", "slider-handle-width", "slider-handle-height", "checkbox-border-width", "checkbox-icon-width", "checkbox-icon-font-size", "radio-icon-width", "colorpicker-value-border-radius", "colorpicker-item-border-radius", "dialog-title-padding-block", "dialog-title-padding-inline", "dialog-title-font-size", "dialog-title-line-height" };
+    private List<string> opacityKeys = new() { "input-disabled-opacity", "rating-disabled-opacity" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        EventService.OnChangeTheme += RefreshThemeState;
+
+        await RefreshThemeState();
+    }
+
+    private async Task RefreshThemeState()
+    {
+        foreach (var key in themeVariables.Keys)
+        {
+            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            if (string.IsNullOrEmpty(value))
+                continue;
+
+            value = value.Trim().Replace("\r\n", "").Replace("\n", "");
+            themeVariables[key] = value;
+
+            if (shadowKeys.Contains(key))
+            {
+                enableShadow[key] = value != "none";
+            }
+            else if (spacingSizeKeys.Contains(key))
+            {
+                var match = Regex.Match(value, @"^([\d.]+)(px|rem|em)$");
+                if (match.Success)
+                {
+                    if (double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
+                        numericVariables[key] = number;
+                    unitVariables[key] = match.Groups[2].Value;
+                }
+                else if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
+                {
+                    numericVariables[key] = number;
+                    unitVariables[key] = "px"; // Default to px if no unit
+                }
+            }
+            else if (opacityKeys.Contains(key))
+            {
+                if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var opacity))
+                    numericVariables[key] = opacity;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnUnitChanged(string key)
+    {
+        UpdateThemeVariable(key);
+    }
+
+    private void OnShadowToggleChanged(string key)
+    {
+        themeVariables[key] = enableShadow[key] ? GetDefaultShadowValue(key) : "none";
+    }
+
+    private string GetDefaultShadowValue(string key)
+    {
+        return key switch
+        {
+            "input-focus-shadow" => "0px 0px 0px 1px var(--rz-white), 0px 0px 0px 3px rgba(var(--rz-primary), 0.2)",
+            _ => "0px 0px 0px 0px rgba(0, 0, 0, 0)"
+        };
+    }
+
+    private void UpdateThemeVariable(string key)
+    {
+        if (spacingSizeKeys.Contains(key))
+        {
+            themeVariables[key] = $"{numericVariables[key]:F3}{unitVariables[key]}";
+        }
+        else if (opacityKeys.Contains(key))
+        {
+            themeVariables[key] = $"{numericVariables[key]:F2}";
+        }
+    }
+
+    private string ToLabel(string key)
+    {
+        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key.Replace("-", " "));
+    }
+
+    private string GetPreviewStyle(string key)
+    {
+        return key switch
+        {
+            string k when k.Contains("border-radius") => $"border-radius: {themeVariables[key]};",
+            string k when k.Contains("font-size") => $"font-size: {themeVariables[key]};",
+            string k when k.Contains("line-height") => $"line-height: {themeVariables[key]};",
+            _ => ""
+        };
+    }
+
+    public Dictionary<string, string> GetThemeVariables()
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var key in themeVariables.Keys)
+        {
+            if (spacingSizeKeys.Contains(key))
+            {
+                result[key] = $"{numericVariables[key]:F3}{unitVariables[key]}";
+            }
+            else if (opacityKeys.Contains(key))
+            {
+                result[key] = $"{numericVariables[key]:F2}";
+            }
+            else
+            {
+                result[key] = themeVariables[key];
+            }
+        }
+        return result;
+    }
+
+    public void Dispose()
+    {
+        EventService.OnChangeTheme -= RefreshThemeState;
+    }
+}

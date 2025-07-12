@@ -1,108 +1,126 @@
 ﻿using DartSassHost;
 using JavaScriptEngineSwitcher.Core;
-using JavaScriptEngineSwitcher.V8;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace RadzenThemeCustomizer.Api;
 
 public class ThemeManagerService
 {
-    private string _themeName = "standard";
-    private readonly string _scssFilePath = Path.Combine(Directory.GetCurrentDirectory(), "scss", "generated", "theme-base.scss");
-    private readonly string _cssFilePath = Path.Combine(Directory.GetCurrentDirectory(), "css", "theme-base.css");
     private readonly string[] _includePaths =
     [
         Path.Combine(Directory.GetCurrentDirectory(), "scss"),
         Path.Combine(Directory.GetCurrentDirectory(), "scss", "components")
     ];
+    private readonly RadzenThemeCustomizerDbContext _dbContext;
 
-    public ThemeManagerService()
+    public ThemeManagerService(RadzenThemeCustomizerDbContext dbContext)
     {
         var jsEngineSwitcher = JsEngineSwitcher.Current;
+        _dbContext = dbContext;
     }
 
-    public async Task UpdateThemeAsync(Dictionary<string, string> properties)
+    public async Task<Theme?> GetSingleThemeAsync(string userId)
     {
-        try
-        {
-            var templateFilePath = Path.Combine(Directory.GetCurrentDirectory(), "scss", $"{_themeName}.scss");
-            var templateContent = await File.ReadAllTextAsync(templateFilePath);
-            var scssContent = UpdateProperties(templateContent, properties);
-
-            await SafeWriteFileAsync(_scssFilePath, scssContent);
-
-            using var compiler = new SassCompiler();
-            var result = compiler.CompileFile(_scssFilePath, options: new CompilationOptions
-            {
-                IncludePaths = _includePaths,
-                OutputStyle = OutputStyle.Expanded
-            });
-
-            var css = result.CompiledContent;
-
-            if (!Directory.Exists(Path.GetDirectoryName(_cssFilePath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(_cssFilePath)!);
-            }
-
-            await SafeWriteFileAsync(_cssFilePath, css);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to update theme: {ex.Message}", ex);
-        }
+        return await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.UserId == userId);
     }
 
-    public async Task<string> GetThemeCssAsync()
+    public async Task<Theme> CreateThemeAsync(string themeName, string userId, string baseTheme)
     {
-        if (!File.Exists(_cssFilePath))
+        var existingTheme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+        if (existingTheme != null)
         {
-            await UpdateThemeAsync(new Dictionary<string, string>());
+            throw new InvalidOperationException($"Theme '{themeName}' already exists for user '{userId}'.");
         }
 
-        return await SafeReadFileAsync(_cssFilePath);
+        var baseThemePath = Path.Combine(Directory.GetCurrentDirectory(), "scss", $"{baseTheme}.scss");
+
+        var scssContent = File.ReadAllText(baseThemePath);
+
+        using var compiler = new SassCompiler();
+        var result = compiler.CompileFile(baseThemePath, options: new CompilationOptions
+        {
+            IncludePaths = _includePaths,
+            OutputStyle = OutputStyle.Expanded
+        });
+        var theme = new Theme
+        {
+            Name = themeName,
+            UserId = userId,
+            ScssContent = scssContent,
+            CssContent = result.CompiledContent
+        };
+        _dbContext.Themes.Add(theme);
+        await _dbContext.SaveChangesAsync();
+
+        return theme;
+
     }
 
-    private async Task<string> GetScssContentAsync()
+    public async Task UpdateThemeAsync(Dictionary<string, string> properties, string themeName, string userId)
     {
-        if (!File.Exists(_scssFilePath))
+        var theme = await _dbContext.Themes
+        .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+
+        if (theme == null)
         {
-            await UpdateThemeAsync(new Dictionary<string, string>());
+            return;
         }
 
-        return await SafeReadFileAsync(_scssFilePath);
+        var scssContent = theme.ScssContent;
+        var updatedScssContent = UpdateProperties(scssContent, properties);
+
+        using var compiler = new SassCompiler();
+        var result = compiler.Compile(updatedScssContent, false, options: new CompilationOptions
+        {
+            IncludePaths = _includePaths,
+            OutputStyle = OutputStyle.Expanded
+        });
+
+        theme.ScssContent = updatedScssContent;
+        theme.CssContent = result.CompiledContent;
+        await _dbContext.SaveChangesAsync();
+
     }
 
-    public async Task<string> GetScssVariableAsync(string variableName)
+    public async Task<string> GetThemeCssAsync(string themeName, string userId)
     {
-        try
+        var theme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+
+        if (theme == null)
         {
-            var scssContent = await GetScssContentAsync();
-            var regex = new Regex($@"\${Regex.Escape(variableName)}\s*:\s*([^;]+?)(?:\s*!default)?;", RegexOptions.Multiline);
-            var match = regex.Match(scssContent);
-
-            if (match.Success)
-            {
-                return match.Groups[1].Value.Trim();
-            }
-
-            Console.WriteLine($"SCSS variable ${variableName} not found in standard.scss");
             return string.Empty;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error getting SCSS variable ${variableName}: {ex.Message}");
-            return string.Empty;
-        }
+
+        return theme.CssContent;
     }
 
-    public async Task ResetThemeAsync(string themeName)
+    public async Task<string> GetScssVariableAsync(string variableName, string themeName, string userId)
     {
-        await SafeDeleteFileAsync(_scssFilePath);
-        await SafeDeleteFileAsync(_cssFilePath);
-        _themeName = themeName;
-        await UpdateThemeAsync(new Dictionary<string, string>());
+        var theme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+
+        if (theme == null)
+        {
+            return string.Empty;
+        }
+
+        var scssContent = theme.ScssContent;
+        var regex = new Regex($@"\${Regex.Escape(variableName)}\s*:\s*([^;]+?)(?:\s*!default)?;", RegexOptions.Multiline);
+        var match = regex.Match(scssContent);
+
+        if (match.Success)
+        {
+            return match.Groups[1].Value.Trim();
+        }
+
+        Console.WriteLine($"SCSS variable ${variableName} not found in theme {theme.Name}");
+        return string.Empty;
+
     }
 
     private string UpdateProperties(string scssContent, Dictionary<string, string> properties)
@@ -120,6 +138,11 @@ public class ThemeManagerService
 
             if (properties.TryGetValue(key, out var newValue))
             {
+                if (string.IsNullOrWhiteSpace(newValue))
+                {
+                    return match.Value;
+                }
+
                 Console.WriteLine($"Updating SCSS variable {variableName} to: {newValue}");
                 return $"{variableName}: {newValue}{(hasDefault ? " !default" : "")};";
             }
@@ -130,86 +153,19 @@ public class ThemeManagerService
         return scssContent;
     }
 
-    private async Task<string> SafeReadFileAsync(string path, int retries = 5)
+    public async Task<byte[]> GetCssFileAsync(string themeName, string userId)
     {
-        if (!File.Exists(path))
+        var theme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+
+        if (theme == null)
         {
-            Console.WriteLine($"File not found: {path}");
-            return string.Empty;
+            return [];
         }
 
-        for (int i = 0; i < retries; i++)
-        {
-            try
-            {
-                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using var reader = new StreamReader(stream);
-                return await reader.ReadToEndAsync();
-            }
-            catch (IOException) when (i < retries - 1)
-            {
-                await Task.Delay(100);
-            }
-        }
+        var cssBytes = Encoding.UTF8.GetBytes(theme.CssContent);
 
-        throw new IOException($"Failed to read file after {retries} attempts: {path}");
-    }
-
-    private async Task SafeWriteFileAsync(string path, string content, int retries = 5)
-    {
-        for (int i = 0; i < retries; i++)
-        {
-            try
-            {
-                if (File.Exists(path))
-                {
-                    await SafeDeleteFileAsync(path);
-                }
-
-                using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-                using var writer = new StreamWriter(stream);
-                await writer.WriteAsync(content);
-                return;
-            }
-            catch (IOException) when (i < retries - 1)
-            {
-                await Task.Delay(100);
-            }
-        }
-
-        throw new IOException($"Failed to write file after {retries} attempts: {path}");
-    }
-
-    private async Task SafeDeleteFileAsync(string path, int retries = 5)
-    {
-        if (!File.Exists(path))
-        {
-            return;
-        }
-
-        for (int i = 0; i < retries; i++)
-        {
-            try
-            {
-                File.Delete(path);
-                return;
-            }
-            catch (IOException) when (i < retries - 1)
-            {
-                await Task.Delay(100);
-            }
-        }
-
-        throw new IOException($"Failed to delete file after {retries} attempts: {path}");
-    }
-
-    public async Task<byte[]> GetCssFileAsync()
-    {
-        if (!File.Exists(_cssFilePath))
-        {
-            throw new FileNotFoundException("CSS file not found. Please ensure the theme has been generated.");
-        }
-        return await File.ReadAllBytesAsync(_cssFilePath);
+        return cssBytes;
     }
 
 }

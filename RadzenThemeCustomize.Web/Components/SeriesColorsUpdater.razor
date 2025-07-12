@@ -16,7 +16,7 @@
                             </RadzenFormField>
                         </RadzenColumn>
                         <RadzenColumn Size="6">
-                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                            <RadzenAlert Style="@GetPreviewStyle(kvp.Key)" AlertStyle="AlertStyle.Primary" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
                         </RadzenColumn>
                     </RadzenRow>
                 }
@@ -35,7 +35,7 @@
                             </RadzenFormField>
                         </RadzenColumn>
                         <RadzenColumn Size="6">
-                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                            <RadzenAlert Style="@GetPreviewStyle(kvp.Key)" AlertStyle="AlertStyle.Primary" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
                         </RadzenColumn>
                     </RadzenRow>
                 }
@@ -54,7 +54,7 @@
                             </RadzenFormField>
                         </RadzenColumn>
                         <RadzenColumn Size="6">
-                            <RadzenAlert class="@($"rz-background-color-{kvp.Key.Replace("rz-", "")}")" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
+                            <RadzenAlert Style="@GetPreviewStyle(kvp.Key)" AlertStyle="AlertStyle.Primary" Size="AlertSize.ExtraSmall" Variant="Variant.Flat" ShowIcon="false" AllowClose="false" Title="@($".rz-background-color-{kvp.Key.Replace("rz-", "")}")" />
                         </RadzenColumn>
                     </RadzenRow>
                 }
@@ -68,11 +68,9 @@
 
     private Dictionary<string, string> seriesColors = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EventService.OnChangeTheme += RefreshThemeState;
-
-        await RefreshThemeState();
     }
 
     private async Task RefreshThemeState()
@@ -80,11 +78,20 @@
         for (int i = 1; i <= 24; i++)
         {
             var key = $"rz-series-{i}";
-            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            var value = await ThemeManagerService.GetScssVariableAsync(new()
+            {
+                VariableName = key,
+                ThemeName = EventService.CurrentTheme
+            });
             seriesColors[key] = value;
         }
 
         StateHasChanged();
+    }
+
+    private string GetPreviewStyle(string colorKey)
+    {
+        return $"background-color: {seriesColors[colorKey]};";
     }
 
     public void Dispose()

@@ -12,6 +12,16 @@
 		<PackageReference Include="JavaScriptEngineSwitcher.V8" Version="3.29.1" />
 		<PackageReference Include="JavaScriptEngineSwitcher.V8.Native.win-x86" Version="3.29.0" />
 		<PackageReference Include="JavaScriptEngineSwitcher.V8.Native.win-x64" Version="3.29.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 
 	</ItemGroup>
 
@@ -20,13 +30,13 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</None>
-		<None Include="scss\generated\*.scss">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</None>
 		<None Include="scss\components\blazor\*.scss">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\RadzenThemeCustomizer.Shared\RadzenThemeCustomizer.Shared.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,10 +1,14 @@
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.V8;
+using Microsoft.EntityFrameworkCore;
 using RadzenThemeCustomizer.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<RadzenThemeCustomizerDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddCors(options =>
 {
@@ -31,6 +35,15 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<RadzenThemeCustomizerDbContext>();
+if (dbContext.Database.GetPendingMigrations().Any())
+{
+    dbContext.Database.Migrate();
+}
+
+app.UseMiddleware<EnsureUserExistsMiddleware>();
 
 app.MapControllers();
 

@@ -134,12 +134,9 @@
     private string bodyBackgroundColorVariable = "";
     private List<VariableOption> availableVariables = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EventService.OnChangeTheme += RefreshThemeState;
-
-        await RefreshThemeState();
-        await base.OnInitializedAsync();
     }
 
     private async Task RefreshThemeState()
@@ -150,7 +147,11 @@
             var keys = layoutVariables.Keys.ToList();
             foreach (var key in keys)
             {
-                var value = await ThemeManagerService.GetScssVariableAsync(key);
+                var value = await ThemeManagerService.GetScssVariableAsync(new()
+                {
+                    VariableName = key,
+                    ThemeName = EventService.CurrentTheme
+                });
                 if (key == "rz-text-font-family")
                 {
                     textFontFamily = value ?? "";
@@ -171,10 +172,18 @@
                 }
             }
 
-            var outlineColorValue = await ThemeManagerService.GetScssVariableAsync("rz-outline-color") ?? "";
+            var outlineColorValue = await ThemeManagerService.GetScssVariableAsync(new()
+            {
+                VariableName = "rz-outline-color",
+                ThemeName = EventService.CurrentTheme
+            }) ?? "";
             outlineColorVariable = outlineColorValue.Substring(6, outlineColorValue.Length - 7);
 
-            var bodyBackgroundColorValue = await ThemeManagerService.GetScssVariableAsync("rz-body-background-color") ?? "";
+            var bodyBackgroundColorValue = await ThemeManagerService.GetScssVariableAsync(new()
+            {
+                VariableName = "rz-body-background-color",
+                ThemeName = EventService.CurrentTheme
+            }) ?? "";
             bodyBackgroundColorVariable = bodyBackgroundColorValue.Substring(6, bodyBackgroundColorValue.Length - 7);
 
             StateHasChanged();

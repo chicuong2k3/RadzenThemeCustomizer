@@ -133,11 +133,9 @@
 
     private List<VariableOption> availableVariables = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EventService.OnChangeTheme += RefreshThemeState;
-
-        await RefreshThemeState();
     }
 
     private async Task RefreshThemeState()
@@ -160,7 +158,11 @@
 
     private async Task<string?> GetVariableNameAsync(string scssVariable)
     {
-        var value = await ThemeManagerService.GetScssVariableAsync(scssVariable) ?? "";
+        var value = await ThemeManagerService.GetScssVariableAsync(new()
+        {
+            VariableName = scssVariable,
+            ThemeName = EventService.CurrentTheme
+        }) ?? "";
         if (value.Contains("var(--"))
         {
             var startIndex = value.IndexOf("var(--") + 6;
@@ -175,7 +177,11 @@
 
     private async Task<string?> GetBorderColorVariableNameAsync(string scssVariable)
     {
-        var value = await ThemeManagerService.GetScssVariableAsync(scssVariable) ?? "";
+        var value = await ThemeManagerService.GetScssVariableAsync(new()
+        {
+            VariableName = scssVariable,
+            ThemeName = EventService.CurrentTheme
+        }) ?? "";
         var match = Regex.Match(value, @"var\(--([a-zA-Z0-9-]+)\)[^var]*$");
         if (match.Success)
         {

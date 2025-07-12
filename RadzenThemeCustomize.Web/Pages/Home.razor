@@ -10,7 +10,7 @@
 
     protected override void OnInitialized()
     {
-        EventService.OnChangeTheme += HandleApplyClicked;
+        //EventService.OnChangeTheme += HandleApplyClicked;
     }
 
     private async Task HandleApplyClicked()
@@ -24,6 +24,6 @@
 
     public void Dispose()
     {
-        EventService.OnChangeTheme -= HandleApplyClicked;
+        //EventService.OnChangeTheme -= HandleApplyClicked;
     }
 }

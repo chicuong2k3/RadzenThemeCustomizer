@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RadzenThemeCustomizer.Api;
+using RadzenThemeCustomizer.Shared;
 using System.Text;
 
 namespace RadzenThemeCustomizer.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ThemeController : ControllerBase
+public partial class ThemeController : ControllerBase
 {
     private readonly ThemeManagerService _themeManagerService;
 
@@ -15,32 +15,48 @@ public class ThemeController : ControllerBase
         _themeManagerService = themeManagerService;
     }
 
-    [HttpPost("update")]
-    public async Task<IActionResult> UpdateTheme([FromBody] Dictionary<string, string> properties)
+    [HttpGet("single")]
+    public async Task<IActionResult> GetSingleTheme()
     {
-        try
+        var theme = await _themeManagerService.GetSingleThemeAsync(HttpContext.GetUserId());
+        if (theme == null)
         {
-            await _themeManagerService.UpdateThemeAsync(properties);
-            return Ok();
+            return NotFound("Theme not found.");
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error updating theme: {ex.Message}");
-        }
+        return Ok(theme.ToDto());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateTheme([FromBody] CreateThemeRequest request)
+    {
+        var createdTheme = await _themeManagerService.CreateThemeAsync(request.ThemeName, HttpContext.GetUserId(), request.BaseTheme);
+        return Ok(createdTheme.ToDto());
+    }
+
+    [HttpPost("update")]
+    public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeRequest request)
+    {
+        await _themeManagerService.UpdateThemeAsync(request.Properties, request.ThemeName, HttpContext.GetUserId());
+        return Ok();
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetThemeCss()
+    public async Task<IActionResult> GetThemeCss([FromQuery] GetThemeCssRequest request)
     {
-        var cssContent = await _themeManagerService.GetThemeCssAsync();
+        var cssContent = await _themeManagerService.GetThemeCssAsync(request.ThemeName, HttpContext.GetUserId());
+
+        if (string.IsNullOrEmpty(cssContent))
+        {
+            return NotFound("Theme not found or CSS content is empty.");
+        }
 
         return Content(cssContent, "text/css", Encoding.UTF8);
     }
 
     [HttpGet("variable")]
-    public async Task<IActionResult> GetVariable([FromQuery] string name)
+    public async Task<IActionResult> GetVariable([FromQuery] GetVariableRequest request)
     {
-        var variable = await _themeManagerService.GetScssVariableAsync(name);
+        var variable = await _themeManagerService.GetScssVariableAsync(request.VariableName, request.ThemeName, HttpContext.GetUserId());
         if (!string.IsNullOrEmpty(variable))
         {
             return Ok(variable);
@@ -48,40 +64,16 @@ public class ThemeController : ControllerBase
         return NotFound();
     }
 
-    // POST: api/theme/reset
-    [HttpPost("reset")]
-    public async Task<IActionResult> ResetTheme([FromBody] ResetThemeRequest request)
+    [HttpPost("css-file")]
+    public async Task<IActionResult> DownloadCssFile([FromBody] DownloadCssFileRequest request)
     {
-        try
-        {
-            await _themeManagerService.ResetThemeAsync(request.ThemeName);
+        var bytes = await _themeManagerService.GetCssFileAsync(request.ThemeName, HttpContext.GetUserId());
 
-            return Ok();
-        }
-        catch (Exception ex)
+        if (bytes == null || bytes.Length == 0)
         {
-            return StatusCode(500, $"Error reseting theme: {ex.Message}");
+            return NotFound("Theme not found or CSS file is empty.");
         }
-    }
 
-    // GET: api/theme/css-file
-    [HttpGet("css-file")]
-    public async Task<IActionResult> GetCssFile()
-    {
-        try
-        {
-
-            var bytes = await _themeManagerService.GetCssFileAsync();
-            return File(bytes, "text/css", "theme.css");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error getting css file: {ex.Message}");
-        }
-    }
-
-    public class ResetThemeRequest
-    {
-        public string ThemeName { get; set; } = string.Empty;
+        return File(bytes, "text/css", "theme.css");
     }
 }

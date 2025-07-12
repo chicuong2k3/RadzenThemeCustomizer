@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using Blazored.LocalStorage;
+using RadzenThemeCustomizer.Shared;
+using System.Net.Http.Json;
 using System.Web;
 
 namespace RadzenThemeCustomizer.Web;
@@ -12,11 +14,46 @@ public class ThemeManagerService
         _httpClient = httpClient;
     }
 
-    public async Task UpdateThemeAsync(Dictionary<string, string> properties)
+    public async Task<ThemeDto?> GetSingleTheme()
     {
         try
         {
-            await _httpClient.PostAsJsonAsync("api/theme/update", properties);
+            return await _httpClient.GetFromJsonAsync<ThemeDto>("api/theme/single");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateThemeAsync] Error: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<ThemeDto?> CreateThemeAsync(CreateThemeRequest request)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/theme", request);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ThemeDto>();
+            }
+            else
+            {
+                Console.WriteLine($"[CreateThemeAsync] Failed to create theme. Status code: {response.StatusCode}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateThemeAsync] Error: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task UpdateThemeAsync(UpdateThemeRequest request)
+    {
+        try
+        {
+            await _httpClient.PostAsJsonAsync("api/theme/update", request);
         }
         catch (Exception ex)
         {
@@ -24,11 +61,14 @@ public class ThemeManagerService
         }
     }
 
-    public async Task<string> GetThemeCssAsync()
+    public async Task<string> GetThemeCssAsync(GetThemeCssRequest request)
     {
         try
         {
-            var response = await _httpClient.GetAsync("api/theme");
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["themeName"] = request.ThemeName;
+
+            var response = await _httpClient.GetAsync($"api/theme?{query}");
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsStringAsync();
@@ -42,12 +82,14 @@ public class ThemeManagerService
         return string.Empty;
     }
 
-    public async Task<string> GetScssVariableAsync(string variableName)
+    public async Task<string> GetScssVariableAsync(GetVariableRequest request)
     {
         try
         {
-            var encoded = HttpUtility.UrlEncode(variableName);
-            var response = await _httpClient.GetAsync($"api/theme/variable?name={encoded}");
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["variableName"] = request.VariableName;
+            query["themeName"] = request.ThemeName;
+            var response = await _httpClient.GetAsync($"api/theme/variable?{query}");
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsStringAsync();
@@ -56,28 +98,17 @@ public class ThemeManagerService
         catch (Exception ex)
         {
             Console.WriteLine($"[GetScssVariableAsync] Error: {ex.Message}");
+            return string.Empty;
         }
 
         return string.Empty;
     }
 
-    public async Task ResetThemeAsync(string themeName)
+    public async Task<byte[]> DownloadCssFileAsync(DownloadCssFileRequest request)
     {
         try
         {
-            await _httpClient.PostAsJsonAsync("api/theme/reset", new { themeName });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ResetThemeAsync] Error: {ex.Message}");
-        }
-    }
-
-    public async Task<byte[]> GetCssFileAsync()
-    {
-        try
-        {
-            var response = await _httpClient.GetAsync("api/theme/css-file");
+            var response = await _httpClient.PostAsJsonAsync("api/theme/css-file", request);
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsByteArrayAsync();
@@ -85,7 +116,7 @@ public class ThemeManagerService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[GetCssFileAsync] Error: {ex.Message}");
+            Console.WriteLine($"[DownloadCssFileAsync] Error: {ex.Message}");
         }
 
         return Array.Empty<byte>();

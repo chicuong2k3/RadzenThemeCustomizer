@@ -1,0 +1,62 @@
+﻿@using RadzenThemeCustomizer.Shared
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="CreateThemeRequest" Data="@CreateThemeRequest" Submit="@Submit">
+    <RadzenStack Orientation="Orientation.Vertical">
+        <RadzenFormField Text="Theme name" Variant="Variant.Outlined" AllowFloatingLabel="false" Style="width: 100%;">
+            <ChildContent>
+                <RadzenTextBox Name="ThemeName" @bind-Value="@CreateThemeRequest.ThemeName" />
+            </ChildContent>
+            <Helper>
+                <RadzenRequiredValidator Component="ThemeName" Text="Theme name is required." />
+            </Helper>
+        </RadzenFormField>
+        <RadzenFormField Text="Base theme" Variant="Variant.Outlined" AllowFloatingLabel="false" Style="width: 100%;">
+            <ChildContent>
+                <RadzenDropDown @bind-Value="@selectedTheme" Data="@predefinedThemes" TextProperty="Name" ValueProperty="Value" Placeholder="Select a theme" />
+            </ChildContent>
+        </RadzenFormField>
+
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="8px">
+            <RadzenButton Text="Đóng" ButtonStyle="ButtonStyle.Secondary" Size="Radzen.ButtonSize.Medium" Click="@(() => DialogService.Close(false))" Variant="Variant.Flat" />
+            <RadzenButton Text="Lưu thay đổi" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Size="Radzen.ButtonSize.Medium" Variant="Variant.Flat" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+
+    private string selectedTheme = "material";
+
+    private List<ThemeOption> predefinedThemes = [
+        new ThemeOption { Name = "Material", Value = "material"},
+        new ThemeOption { Name = "Material Dark", Value = "material-dark"},
+        new ThemeOption { Name = "Material 3", Value = "material-3"},
+        new ThemeOption { Name = "Material 3 Dark", Value = "material-3-dark"},
+        new ThemeOption { Name = "Humanistic", Value = "humanistic"},
+        new ThemeOption { Name = "Humanistic Dark", Value = "humanistic-dark"},
+        new ThemeOption { Name = "Software", Value = "software"},
+        new ThemeOption { Name = "Software Dark", Value = "software-dark"},
+        new ThemeOption { Name = "Standard", Value = "standard"},
+        new ThemeOption { Name = "Standard Dark", Value = "standard-dark"},
+        new ThemeOption { Name = "Default", Value = "default"},
+        new ThemeOption { Name = "Default Dark", Value = "dark"}
+    ];
+
+
+    [Parameter]
+    public CreateThemeRequest CreateThemeRequest { get; set; } = new();
+
+    public void Submit()
+    {
+        if (selectedTheme == null)
+        {
+            DialogService.Close(false);
+            return;
+        }
+        CreateThemeRequest.BaseTheme = selectedTheme;
+        DialogService.Close(true);
+    }
+}

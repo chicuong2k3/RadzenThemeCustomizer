@@ -57,8 +57,8 @@
                                         </RadzenRow>
                                         <RadzenRow>
                                             <RadzenColumn Size="12">
-                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined">
-                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" ShowAlpha="true" Change="@(color => OnColorChanged(shadow.Key, color))" />
+                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined" Style="width: 100%">
+                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" Change="@(color => OnColorChanged(shadow.Key, color))" />
                                                 </RadzenFormField>
                                             </RadzenColumn>
                                         </RadzenRow>
@@ -115,8 +115,8 @@
                                         </RadzenRow>
                                         <RadzenRow>
                                             <RadzenColumn Size="12">
-                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined">
-                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" ShowAlpha="true" Change="@(color => OnColorChanged(shadow.Key, color))" />
+                                                <RadzenFormField Text="Color (with Opacity)" Variant="Variant.Outlined" Style="width: 100%">
+                                                    <RadzenColorPicker @bind-Value="@colorValues[shadow.Key]" Change="@(color => OnColorChanged(shadow.Key, color))" />
                                                 </RadzenFormField>
                                             </RadzenColumn>
                                         </RadzenRow>
@@ -176,11 +176,9 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EventService.OnChangeTheme += RefreshThemeState;
-
-        await RefreshThemeState();
     }
 
     private async Task RefreshThemeState()
@@ -188,7 +186,11 @@
 
         foreach (var key in shadowVariables.Keys)
         {
-            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            var value = await ThemeManagerService.GetScssVariableAsync(new()
+            {
+                VariableName = key,
+                ThemeName = EventService.CurrentTheme
+            });
             if (string.IsNullOrEmpty(value))
             {
                 continue;
@@ -258,7 +260,7 @@
     {
         if (!string.IsNullOrEmpty(color))
         {
-            colorValues[shadowKey] = color; // RadzenColorPicker with ShowAlpha="true" returns rgba
+            colorValues[shadowKey] = color;
         }
     }
 

@@ -90,8 +90,15 @@
                 data = data.Concat(semanticColorVariables).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             }
 
-            await ThemeManagerService.UpdateThemeAsync(data);
-            string css = await ThemeManagerService.GetThemeCssAsync();
+            await ThemeManagerService.UpdateThemeAsync(new()
+            {
+                Properties = data,
+                ThemeName = EventService.CurrentTheme
+            });
+            string css = await ThemeManagerService.GetThemeCssAsync(new()
+            {
+                ThemeName = EventService.CurrentTheme
+            });
             await JSRuntime.InvokeVoidAsync("injectCss", css);
             StateHasChanged();
 

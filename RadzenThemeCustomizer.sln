@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadzenThemeCustomizer.Web",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadzenThemeCustomizer.Api", "RadzenThemeCustomizer.Api\RadzenThemeCustomizer.Api.csproj", "{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadzenThemeCustomizer.Shared", "RadzenThemeCustomizer.Shared\RadzenThemeCustomizer.Shared.csproj", "{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|x86.ActiveCfg = Release|Any CPU
 		{397A4B8F-9F85-47E9-73BC-AA54DB7257B1}.Release|x86.Build.0 = Release|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Debug|x86.Build.0 = Debug|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Release|x86.ActiveCfg = Release|Any CPU
+		{7CE35FD6-EBDE-4BCF-BCA5-459A45CC9A82}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

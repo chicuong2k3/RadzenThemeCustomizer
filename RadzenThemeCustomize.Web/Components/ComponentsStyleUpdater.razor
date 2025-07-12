@@ -196,18 +196,20 @@
     private List<string> spacingSizeKeys = new() { "rz-carousel-pager-gap", "grid-border-radius", "grid-header-font-size", "datepicker-header-padding-block", "datepicker-header-padding-inline", "datepicker-calendar-padding-block", "datepicker-calendar-padding-inline", "slider-handle-width", "slider-handle-height", "checkbox-border-width", "checkbox-icon-width", "checkbox-icon-font-size", "radio-icon-width", "colorpicker-value-border-radius", "colorpicker-item-border-radius", "dialog-title-padding-block", "dialog-title-padding-inline", "dialog-title-font-size", "dialog-title-line-height" };
     private List<string> opacityKeys = new() { "input-disabled-opacity", "rating-disabled-opacity" };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         EventService.OnChangeTheme += RefreshThemeState;
-
-        await RefreshThemeState();
     }
 
     private async Task RefreshThemeState()
     {
         foreach (var key in themeVariables.Keys)
         {
-            var value = await ThemeManagerService.GetScssVariableAsync(key);
+            var value = await ThemeManagerService.GetScssVariableAsync(new()
+            {
+                VariableName = key,
+                ThemeName = EventService.CurrentTheme
+            });
             if (string.IsNullOrEmpty(value))
                 continue;
 

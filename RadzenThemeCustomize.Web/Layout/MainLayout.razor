@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
 @using Radzen.Blazor.Rendering
+@using RadzenThemeCustomizer.Shared
 @using RadzenThemeCustomizer.Web
 
 
@@ -18,13 +19,13 @@
     <RadzenHeader Style="padding: 16px; box-shadow: none;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
-                <RadzenDropDown Disabled="@isApplied" Placeholder="Pick a theme to build upon" Value="@selectedTheme" TextProperty="Name" ValueChanged="@((ThemeOption theme) => OnThemeChanged(theme))" Data="@predefinedThemes" />
-                <RadzenButton Disabled="@(isApplied || selectedTheme == null)" Click="ResetTheme">Use theme</RadzenButton>
-                <RadzenButton Disabled="@(!isApplied)" Click="Clear">Clear</RadzenButton>
+                <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success">Create new theme</RadzenButton>
+                <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Info">Theme list</RadzenButton>
+
             </RadzenStack>
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
                 <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
-                <RadzenButton Click="ChangeTheme">Apply</RadzenButton>
+                <RadzenButton Click="ChangeTheme" ButtonStyle="ButtonStyle.Info">Apply</RadzenButton>
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
@@ -37,12 +38,11 @@
 
 
 @code {
-    private ThemeOption? selectedTheme = null;
-    private bool isApplied = false;
-
     private List<ThemeOption> predefinedThemes = [
         new ThemeOption { Name = "Material", Value = "material"},
         new ThemeOption { Name = "Material Dark", Value = "material-dark"},
+        new ThemeOption { Name = "Material 3", Value = "material-3"},
+        new ThemeOption { Name = "Material 3 Dark", Value = "material-3-dark"},
         new ThemeOption { Name = "Humanistic", Value = "humanistic"},
         new ThemeOption { Name = "Humanistic Dark", Value = "humanistic-dark"},
         new ThemeOption { Name = "Software", Value = "software"},
@@ -53,31 +53,63 @@
         new ThemeOption { Name = "Default Dark", Value = "dark"}
     ];
 
+    private CreateThemeRequest createThemeRequest = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var randomTheme = predefinedThemes[1].Value;
+        var themeName = $"{randomTheme}-{Guid.NewGuid()}";
+        var theme = await ThemeManagerService.GetSingleTheme();
+        if (theme == null)
+        {
+            theme = await ThemeManagerService.CreateThemeAsync(new()
+            {
+                BaseTheme = randomTheme,
+                ThemeName = themeName
+            });
+
+            if (theme == null)
+            {
+                return;
+            }
+
+        }
+
+        await JSRuntime.InvokeVoidAsync("injectCss", theme.CssContent);
+        await EventService.SetThemeAsync(theme.Name);
+        StateHasChanged();
+    }
+
     private async Task ChangeTheme()
     {
         await EventService.TriggerChangeTheme();
         StateHasChanged();
     }
 
-    private async Task ResetTheme()
+    private async Task CreateTheme()
     {
-        if (selectedTheme == null)
+        var ok = await DialogService.OpenAsync<ThemeCreateDialog>("Create new theme", new Dictionary<string, object>()
         {
-            return;
+            {"CreateThemeRequest", createThemeRequest}
+        });
+
+        if (ok == true)
+        {
+            var theme = await ThemeManagerService.CreateThemeAsync(createThemeRequest);
+            if (theme != null)
+            {
+                await JSRuntime.InvokeVoidAsync("injectCss", theme.CssContent);
+                await EventService.SetThemeAsync(theme.Name);
+                StateHasChanged();
+            }
+
+            createThemeRequest = new();
         }
-
-        await ThemeManagerService.ResetThemeAsync(selectedTheme.Value);
-        string css = await ThemeManagerService.GetThemeCssAsync();
-
-        await JSRuntime.InvokeVoidAsync("injectCss", css);
-        await EventService.TriggerChangeTheme();
-        isApplied = true;
-        StateHasChanged();
     }
 
-    private void OnThemeChanged(ThemeOption theme)
+    private void ViewThemeList()
     {
-        selectedTheme = theme;
+        NavigationManager.NavigateTo("themes");
     }
 
     private void DownloadCss()
@@ -85,26 +117,5 @@
         NavigationManager.NavigateTo($"download/css", true);
     }
 
-    private async Task Clear()
-    {
-        var ok = await DialogService.Confirm("This action will clear all current theme settings and reset them to default. Are you sure you want to continue?", "Clear theme");
 
-        if (ok == true)
-        {
-            await ThemeManagerService.ResetThemeAsync(predefinedThemes[0].Value);
-            string css = await ThemeManagerService.GetThemeCssAsync();
-
-            await JSRuntime.InvokeVoidAsync("injectCss", css);
-            await EventService.TriggerChangeTheme();
-            selectedTheme = predefinedThemes[0];
-            isApplied = false;
-            StateHasChanged();
-        }
-    }
-
-    public class ThemeOption
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Value { get; set; } = string.Empty;
-    }
 }

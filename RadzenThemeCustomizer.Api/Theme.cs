@@ -19,7 +19,6 @@ public static class ThemeDtoExtensions
         return new ThemeDto
         {
             Name = theme.Name,
-            CssContent = theme.CssContent,
             UserId = theme.UserId
         };
     }

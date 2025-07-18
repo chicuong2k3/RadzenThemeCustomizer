@@ -1,6 +1,7 @@
 ﻿using DartSassHost;
 using JavaScriptEngineSwitcher.Core;
 using Microsoft.EntityFrameworkCore;
+using RadzenThemeCustomizer.Shared;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -25,6 +26,39 @@ public class ThemeManagerService
     {
         return await _dbContext.Themes
             .FirstOrDefaultAsync(t => t.UserId == userId);
+    }
+
+    public async Task<PaginationResult<Theme>> GetThemesAsync(string userId, int pageNumber, int pageSize)
+    {
+        var totalCount = await _dbContext.Themes
+            .CountAsync(t => t.UserId == userId);
+
+        var items = await _dbContext.Themes
+            .Where(t => t.UserId == userId)
+            .OrderBy(t => t.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginationResult<Theme>()
+        {
+            TotalCount = totalCount,
+            PageSize = pageSize,
+            PageNumber = pageNumber,
+            Items = items
+        };
+    }
+
+    public async Task DeleteThemeAsync(string themeName, string userId)
+    {
+        var theme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+        if (theme == null)
+        {
+            throw new InvalidOperationException($"Theme '{themeName}' not found for user '{userId}'.");
+        }
+        _dbContext.Themes.Remove(theme);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<Theme> CreateThemeAsync(string themeName, string userId, string baseTheme)
@@ -130,11 +164,15 @@ public class ThemeManagerService
             RegexOptions.Multiline
         );
 
+        var existingKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         scssContent = regex.Replace(scssContent, match =>
         {
             string variableName = match.Groups[1].Value;
             string key = variableName.Substring(1);
             bool hasDefault = match.Value.Contains("!default");
+
+            existingKeys.Add(key);
 
             if (properties.TryGetValue(key, out var newValue))
             {
@@ -143,15 +181,31 @@ public class ThemeManagerService
                     return match.Value;
                 }
 
-                Console.WriteLine($"Updating SCSS variable {variableName} to: {newValue}");
                 return $"{variableName}: {newValue}{(hasDefault ? " !default" : "")};";
             }
 
             return match.Value;
         });
 
+        var newLines = new List<string>();
+        foreach (var kvp in properties)
+        {
+            if (!existingKeys.Contains(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
+            {
+                string variableName = $"${kvp.Key}";
+                string newLine = $"{variableName}: {kvp.Value} !default;";
+                newLines.Add(newLine);
+            }
+        }
+
+        if (newLines.Count > 0)
+        {
+            scssContent += Environment.NewLine + string.Join(Environment.NewLine, newLines);
+        }
+
         return scssContent;
     }
+
 
     public async Task<byte[]> GetCssFileAsync(string themeName, string userId)
     {

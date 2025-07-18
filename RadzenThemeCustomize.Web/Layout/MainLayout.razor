@@ -1,34 +1,13 @@
 ﻿@inherits LayoutComponentBase
-@inject LayoutEventService EventService
-@inject ThemeManagerService ThemeManagerService
-@inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
-@inject DialogService DialogService
-@using Radzen.Blazor.Rendering
-@using RadzenThemeCustomizer.Shared
-@using RadzenThemeCustomizer.Web
-
 
 <HeadContent>
-    <RadzenTheme Theme="material" />
+    <RadzenTheme />
 </HeadContent>
 
 <RadzenComponents />
 
 <RadzenLayout>
-    <RadzenHeader Style="padding: 16px; box-shadow: none;">
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
-                <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success">Create new theme</RadzenButton>
-                <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Info">Theme list</RadzenButton>
-
-            </RadzenStack>
-            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
-                <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
-                <RadzenButton Click="ChangeTheme" ButtonStyle="ButtonStyle.Info">Apply</RadzenButton>
-            </RadzenStack>
-        </RadzenStack>
-    </RadzenHeader>
+    <Header />
     <RadzenBody>
         @Body
     </RadzenBody>
@@ -38,84 +17,5 @@
 
 
 @code {
-    private List<ThemeOption> predefinedThemes = [
-        new ThemeOption { Name = "Material", Value = "material"},
-        new ThemeOption { Name = "Material Dark", Value = "material-dark"},
-        new ThemeOption { Name = "Material 3", Value = "material-3"},
-        new ThemeOption { Name = "Material 3 Dark", Value = "material-3-dark"},
-        new ThemeOption { Name = "Humanistic", Value = "humanistic"},
-        new ThemeOption { Name = "Humanistic Dark", Value = "humanistic-dark"},
-        new ThemeOption { Name = "Software", Value = "software"},
-        new ThemeOption { Name = "Software Dark", Value = "software-dark"},
-        new ThemeOption { Name = "Standard", Value = "standard"},
-        new ThemeOption { Name = "Standard Dark", Value = "standard-dark"},
-        new ThemeOption { Name = "Default", Value = "default"},
-        new ThemeOption { Name = "Default Dark", Value = "dark"}
-    ];
-
-    private CreateThemeRequest createThemeRequest = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var randomTheme = predefinedThemes[1].Value;
-        var themeName = $"{randomTheme}-{Guid.NewGuid()}";
-        var theme = await ThemeManagerService.GetSingleTheme();
-        if (theme == null)
-        {
-            theme = await ThemeManagerService.CreateThemeAsync(new()
-            {
-                BaseTheme = randomTheme,
-                ThemeName = themeName
-            });
-
-            if (theme == null)
-            {
-                return;
-            }
-
-        }
-
-        await JSRuntime.InvokeVoidAsync("injectCss", theme.CssContent);
-        await EventService.SetThemeAsync(theme.Name);
-        StateHasChanged();
-    }
-
-    private async Task ChangeTheme()
-    {
-        await EventService.TriggerChangeTheme();
-        StateHasChanged();
-    }
-
-    private async Task CreateTheme()
-    {
-        var ok = await DialogService.OpenAsync<ThemeCreateDialog>("Create new theme", new Dictionary<string, object>()
-        {
-            {"CreateThemeRequest", createThemeRequest}
-        });
-
-        if (ok == true)
-        {
-            var theme = await ThemeManagerService.CreateThemeAsync(createThemeRequest);
-            if (theme != null)
-            {
-                await JSRuntime.InvokeVoidAsync("injectCss", theme.CssContent);
-                await EventService.SetThemeAsync(theme.Name);
-                StateHasChanged();
-            }
-
-            createThemeRequest = new();
-        }
-    }
-
-    private void ViewThemeList()
-    {
-        NavigationManager.NavigateTo("themes");
-    }
-
-    private void DownloadCss()
-    {
-        NavigationManager.NavigateTo($"download/css", true);
-    }
-
 
 }

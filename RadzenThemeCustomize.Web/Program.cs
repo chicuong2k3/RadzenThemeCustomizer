@@ -1,21 +1,26 @@
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
 using RadzenThemeCustomizer.Web;
 using System.Net.Http.Json;
+using TimeWarp.State;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Services.AddTimeWarpState();
+
 var tempClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
-var settings = await tempClient.GetFromJsonAsync<AppSettings>("appsettings.json");
+
+var settingsFile = builder.HostEnvironment.Environment == "Development"
+    ? "appsettings.Development.json"
+    : "appsettings.json";
+var settings = await tempClient.GetFromJsonAsync<AppSettings>(settingsFile);
+builder.Services.AddSingleton(settings!);
 
 builder.Services.AddRadzenComponents();
 builder.Services.AddScoped<ThemeManagerService>();
-
-builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<LayoutEventService>();
 builder.Services.AddScoped<ColorVariableService>();

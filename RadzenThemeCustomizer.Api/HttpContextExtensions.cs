@@ -4,15 +4,18 @@ public static class HttpContextExtensions
 {
     public static string GetUserId(this HttpContext context)
     {
-        //var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+        var ip = context.Connection.RemoteIpAddress;
 
-        //if (!string.IsNullOrWhiteSpace(ipAddress))
-        //{
-        //    return ipAddress;
-        //}
+        if (ip != null)
+        {
+            if (ip.IsIPv4MappedToIPv6)
+            {
+                ip = ip.MapToIPv4();
+            }
 
-        return "123";
+            return ip.ToString();
+        }
 
-        //throw new InvalidOperationException("Unable to determine client IP address.");
+        throw new InvalidOperationException("Unable to determine client IP address.");
     }
 }

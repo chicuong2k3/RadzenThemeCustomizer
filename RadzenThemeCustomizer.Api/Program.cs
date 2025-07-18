@@ -12,8 +12,10 @@ builder.Services.AddDbContext<RadzenThemeCustomizerDbContext>(options =>
 
 builder.Services.AddCors(options =>
 {
+    var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
     options.AddDefaultPolicy(
-        builder => builder.AllowAnyOrigin()
+        builder => builder.WithOrigins(origins)
                           .AllowAnyMethod()
                           .AllowAnyHeader());
 });

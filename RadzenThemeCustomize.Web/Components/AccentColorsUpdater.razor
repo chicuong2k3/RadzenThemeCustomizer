@@ -1,8 +1,6 @@
 ﻿@using RadzenThemeCustomizer.Web
-@inject LayoutEventService EventService
-@inject ThemeManagerService ThemeManagerService
-@implements IDisposable
 
+@inherits TimeWarp.State.TimeWarpStateComponent
 
 
 <RadzenFieldset Text="Accent Color Palette">
@@ -12,71 +10,78 @@
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Base Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@baseColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.BaseColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-base", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Primary" Style="@GetPreviewStyle("rz-base")" Variant="Variant.Flat" ShowIcon="false" Title=".rz-base" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Primary" Style="background: var(--rz-base)" Variant="Variant.Flat" ShowIcon="false" Title=".rz-base" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Primary Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@primaryColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.PrimaryColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-primary", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Primary" Style="@GetPreviewStyle("rz-primary")" Variant="Variant.Flat" ShowIcon="false" Title=".rz-primary" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Primary" Variant="Variant.Flat" ShowIcon="false" Title=".rz-primary" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Secondary Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@secondaryColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.SecondaryColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-secondary", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Secondary" Style="@GetPreviewStyle("rz-secondary")" Variant="Variant.Flat" ShowIcon="false" Title=".rz-secondary" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Secondary" Variant="Variant.Flat" ShowIcon="false" Title=".rz-secondary" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Info Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@infoColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.InfoColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-info", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Style="@GetPreviewStyle("rz-info")" ShowIcon="false" Title=".rz-info" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Info" Variant="Variant.Flat" ShowIcon="false" Title=".rz-info" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Success Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@successColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.SuccessColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-success", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Style="@GetPreviewStyle("rz-success")" ShowIcon="false" Title=".rz-success" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Success" Variant="Variant.Flat" ShowIcon="false" Title=".rz-success" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Warning Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@warningColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.WarningColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-warning", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Style="@GetPreviewStyle("rz-warning")" ShowIcon="false" Title=".rz-warning" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" ShowIcon="false" Title=".rz-warning" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" Gap="4px">
                     <RadzenColumn Size="6">
                         <RadzenFormField Text="Danger Color" Style="width: 100%">
-                            <RadzenColorPicker @bind-Value="@dangerColor" ShowColors="false" />
+                            <RadzenColorPicker Value="@ThemeState.DangerColor" ShowColors="false"
+                                               ValueChanged="@((string color) => DebouncedDispatch("rz-danger", color))" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Danger" Style="@GetPreviewStyle("rz-danger")" Variant="Variant.Flat" ShowIcon="false" Title=".rz-danger" AllowClose="false" />
+                        <RadzenAlert Size="AlertSize.ExtraSmall" AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" ShowIcon="false" Title=".rz-danger" AllowClose="false" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenStack>
@@ -87,101 +92,38 @@
 
 
 @code {
-    private string baseColor = string.Empty;
-    private string primaryColor = string.Empty;
-    private string secondaryColor = string.Empty;
-    private string infoColor = string.Empty;
-    private string successColor = string.Empty;
-    private string warningColor = string.Empty;
-    private string dangerColor = string.Empty;
+    private ThemeState ThemeState => GetState<ThemeState>();
 
-    protected override void OnInitialized()
+    private readonly Dictionary<string, CancellationTokenSource> debounceTokens = new();
+    private void DebouncedDispatch(string variable, string value, int delay = 100)
     {
-        EventService.OnChangeTheme += RefreshThemeState;
+        if (debounceTokens.TryGetValue(variable, out var existingToken))
+        {
+            existingToken.Cancel();
+            existingToken.Dispose();
+        }
+
+        var cts = new CancellationTokenSource();
+        debounceTokens[variable] = cts;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(delay, cts.Token);
+                await ThemeState.ChangeAccentColor(variable, value);
+            }
+            catch (TaskCanceledException) { }
+        });
     }
 
-    private async Task RefreshThemeState()
+    public override void Dispose()
     {
-        var themeName = EventService.CurrentTheme;
-
-        baseColor = await ThemeManagerService.GetScssVariableAsync(new()
+        foreach (var cts in debounceTokens.Values)
         {
-            VariableName = "rz-base",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        primaryColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-primary",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        secondaryColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-secondary",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        infoColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-info",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        successColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-success",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        warningColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-warning",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        dangerColor = await ThemeManagerService.GetScssVariableAsync(new()
-        {
-            VariableName = "rz-danger",
-            ThemeName = themeName
-        }) ?? string.Empty;
-
-        StateHasChanged();
-    }
-
-
-    private string GetPreviewStyle(string colorKey)
-    {
-        var color = colorKey switch
-        {
-            "rz-base" => baseColor,
-            "rz-primary" => primaryColor,
-            "rz-secondary" => secondaryColor,
-            "rz-info" => infoColor,
-            "rz-success" => successColor,
-            "rz-warning" => warningColor,
-            "rz-danger" => dangerColor,
-            _ => "#ffffff"
-        };
-        return $"background-color: {color};";
-    }
-
-    public void Dispose()
-    {
-        EventService.OnChangeTheme -= RefreshThemeState;
-    }
-
-    public Dictionary<string, string> GetAccentColors()
-    {
-        return new Dictionary<string, string>
-        {
-            { "rz-base", baseColor },
-            { "rz-primary", primaryColor },
-            { "rz-secondary", secondaryColor },
-            { "rz-info", infoColor },
-            { "rz-success", successColor },
-            { "rz-warning", warningColor },
-            { "rz-danger", dangerColor }
-        };
+            cts.Cancel();
+            cts.Dispose();
+        }
+        debounceTokens.Clear();
     }
 }

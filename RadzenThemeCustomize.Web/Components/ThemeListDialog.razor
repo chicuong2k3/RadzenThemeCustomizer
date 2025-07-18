@@ -1,0 +1,108 @@
+﻿@inherits TimeWarp.State.TimeWarpStateComponent
+
+@inject ThemeManagerService ThemeManagerService
+@inject DialogService DialogService
+
+<RadzenDataGrid Data="@themes" IsLoading="@isLoading" TItem="ThemeDto" AllowSorting="false" AllowFiltering="false" AllowPaging="false" AllowVirtualization="true" AllowAlternatingRows="true" Density="Radzen.Density.Compact" GridLines="Radzen.DataGridGridLines.Default" Responsive="false" AllowCompositeDataCells="false" ShowCellDataAsTooltip="true" AllowRowSelectOnRowClick="false" EditMode="Radzen.DataGridEditMode.Single" PagerAlwaysVisible="false" PagerHorizontalAlign="Radzen.HorizontalAlign.Right" PageSize="5" GotoFirstPageOnSort="true" FilterMode="Radzen.FilterMode.Simple" FilterPopupRenderMode="Radzen.PopupRenderMode.Initial" FilterDelay="0" FilterCaseSensitivity="Radzen.FilterCaseSensitivity.CaseInsensitive">
+    <Columns>
+        <RadzenDataGridColumn TItem="ThemeDto" Property="Name" Title="Name">
+            <Template Context="theme">
+                @theme.Name
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="ThemeDto" Title="Action" Sortable="false" Filterable="false">
+            <Template Context="theme">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="8px">
+                    <RadzenButton Text="Delete" Click="@(() => DeleteTheme(theme))" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Select theme" IsBusy="@(isSelectingThemeDict.TryGetValue(theme, out var isSelecting) && isSelecting)" BusyText="Applying theme" Click="@(() => SelectTheme(theme))" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                </RadzenStack>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+            <RadzenProgressBarCircular ShowValue="false" ProgressBarStyle="ProgressBarStyle.Primary" />
+        </RadzenStack>
+    </LoadingTemplate>
+</RadzenDataGrid>
+@if (TotalPages > 0)
+{
+    <RadzenPager Density="Density.Compact" PageSize="@pageSize" PageSizeChanged="OnPageSizeChanged" PageChanged="@((e) => OnPageChanged(e))" Count="@TotalItems" PageSizeOptions="[5, 10, 20]" HorizontalAlign="HorizontalAlign.Right" Style="margin-top: 16px;" />
+}
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="8px" Style="margin-top: 16px">
+    <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Secondary" Size="Radzen.ButtonSize.Medium" Click="@(() => DialogService.Close(false))" Variant="Variant.Flat" />
+</RadzenStack>
+
+@code {
+    private List<ThemeDto> themes = [];
+    private bool isLoading = true;
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private int TotalPages;
+    private int TotalItems;
+    private Dictionary<ThemeDto, bool> isSelectingThemeDict = new();
+
+    private ThemeState ThemeState => GetState<ThemeState>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadThemesAsync();
+    }
+
+    private async Task LoadThemesAsync()
+    {
+        isLoading = true;
+        var response = await ThemeManagerService.GetThemesAsync(new GetThemesRequest()
+        {
+            PageNumber = currentPage,
+            PageSize = pageSize
+        });
+
+        if (response != null)
+        {
+            themes = response.Items;
+            TotalItems = response.TotalCount;
+            TotalPages = response.TotalPages;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task OnPageChanged(PagerEventArgs args)
+    {
+        if (args.PageIndex >= 0 && args.PageIndex < TotalPages)
+        {
+            currentPage = args.PageIndex + 1;
+            await LoadThemesAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnPageSizeChanged(int newSize)
+    {
+        pageSize = newSize;
+        currentPage = 1;
+        await LoadThemesAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DeleteTheme(ThemeDto theme)
+    {
+        var confirm = await DialogService.Confirm($"Are you sure you want to delete the theme '{theme.Name}'?", "Confirm Delete", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirm.HasValue && confirm.Value)
+        {
+            await ThemeManagerService.DeleteThemeAsync(theme.Name);
+            await LoadThemesAsync();
+        }
+    }
+
+    private async Task SelectTheme(ThemeDto theme)
+    {
+        isSelectingThemeDict[theme] = true;
+
+        await ThemeState.ChangeTheme(theme.Name);
+
+        isSelectingThemeDict[theme] = false;
+    }
+}

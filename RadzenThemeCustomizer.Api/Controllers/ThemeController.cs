@@ -26,6 +26,26 @@ public partial class ThemeController : ControllerBase
         return Ok(theme.ToDto());
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetThemes([FromQuery] GetThemesRequest request)
+    {
+        var result = await _themeManagerService.GetThemesAsync(HttpContext.GetUserId(), request.PageNumber, request.PageSize);
+        return Ok(new PaginationResult<ThemeDto>()
+        {
+            TotalCount = result.TotalCount,
+            PageSize = result.PageSize,
+            PageNumber = result.PageNumber,
+            Items = result.Items.Select(t => t.ToDto()).ToList()
+        });
+    }
+
+    [HttpDelete("{themeName}")]
+    public async Task<IActionResult> DeleteTheme(string themeName)
+    {
+        await _themeManagerService.DeleteThemeAsync(themeName, HttpContext.GetUserId());
+        return NoContent();
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateTheme([FromBody] CreateThemeRequest request)
     {
@@ -33,14 +53,14 @@ public partial class ThemeController : ControllerBase
         return Ok(createdTheme.ToDto());
     }
 
-    [HttpPost("update")]
+    [HttpPut]
     public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeRequest request)
     {
         await _themeManagerService.UpdateThemeAsync(request.Properties, request.ThemeName, HttpContext.GetUserId());
         return Ok();
     }
 
-    [HttpGet]
+    [HttpGet("css")]
     public async Task<IActionResult> GetThemeCss([FromQuery] GetThemeCssRequest request)
     {
         var cssContent = await _themeManagerService.GetThemeCssAsync(request.ThemeName, HttpContext.GetUserId());

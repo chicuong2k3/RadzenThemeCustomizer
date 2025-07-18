@@ -1,5 +1,4 @@
-﻿using Blazored.LocalStorage;
-using RadzenThemeCustomizer.Shared;
+﻿using RadzenThemeCustomizer.Shared;
 using System.Net.Http.Json;
 using System.Web;
 
@@ -24,6 +23,43 @@ public class ThemeManagerService
         {
             Console.WriteLine($"[CreateThemeAsync] Error: {ex.Message}");
             return null;
+        }
+    }
+
+    public async Task<PaginationResult<ThemeDto>?> GetThemesAsync(GetThemesRequest request)
+    {
+        try
+        {
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["pageSize"] = request.PageSize.ToString();
+            query["pageNumber"] = request.PageNumber.ToString();
+            if (!string.IsNullOrEmpty(request.SearchTerm))
+            {
+                query["searchTerm"] = request.SearchTerm;
+            }
+
+            return await _httpClient.GetFromJsonAsync<PaginationResult<ThemeDto>>("api/theme");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GetThemesAsync] Error: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task DeleteThemeAsync(string themeName)
+    {
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"api/theme/{themeName}");
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DeleteThemeAsync] Failed to delete theme. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DeleteThemeAsync] Error: {ex.Message}");
         }
     }
 
@@ -53,7 +89,7 @@ public class ThemeManagerService
     {
         try
         {
-            await _httpClient.PostAsJsonAsync("api/theme/update", request);
+            await _httpClient.PutAsJsonAsync("api/theme", request);
         }
         catch (Exception ex)
         {
@@ -68,7 +104,7 @@ public class ThemeManagerService
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["themeName"] = request.ThemeName;
 
-            var response = await _httpClient.GetAsync($"api/theme?{query}");
+            var response = await _httpClient.GetAsync($"api/theme/css?{query}");
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsStringAsync();

@@ -1,0 +1,87 @@
+﻿@inherits TimeWarp.State.TimeWarpStateComponent
+
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ThemeManagerService ThemeManagerService
+@inject AppSettings AppSettings
+@inject IJSRuntime JSRuntime
+
+<RadzenHeader Style="padding: 16px; box-shadow: none;">
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
+            <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success">Create new theme</RadzenButton>
+            <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Info">Theme list</RadzenButton>
+
+            <RadzenText TextStyle="TextStyle.DisplayH6">Current theme: @ThemeState.CurrentTheme</RadzenText>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
+            <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenHeader>
+
+@code {
+    private ThemeState ThemeState => GetState<ThemeState>();
+    private CreateThemeRequest createThemeRequest = new();
+    private bool isUpdatingTheme = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var randomTheme = "software";
+        var themeName = $"{randomTheme}-{Guid.NewGuid()}";
+        var theme = await ThemeManagerService.GetSingleTheme();
+        if (theme == null)
+        {
+            theme = await ThemeManagerService.CreateThemeAsync(new()
+            {
+                BaseTheme = randomTheme,
+                ThemeName = themeName
+            });
+
+            if (theme == null)
+            {
+                return;
+            }
+
+        }
+
+        await ThemeState.ChangeTheme(theme.Name);
+
+    }
+
+    private async Task CreateTheme()
+    {
+        var ok = await DialogService.OpenAsync<ThemeCreateDialog>("Create new theme", new Dictionary<string, object>()
+        {
+            { "CreateThemeRequest", createThemeRequest }
+        });
+
+        if (ok == true)
+        {
+            var theme = await ThemeManagerService.CreateThemeAsync(createThemeRequest);
+            if (theme != null)
+            {
+                await ThemeState.ChangeTheme(theme.Name);
+                createThemeRequest = new();
+            }
+
+        }
+    }
+
+    private async Task ViewThemeList()
+    {
+        await DialogService.OpenAsync<ThemeListDialog>("Themes", new Dictionary<string, object>()
+        {
+        });
+    }
+
+
+    private async Task DownloadCss()
+    {
+        var data = new { themeName = ThemeState.CurrentTheme };
+
+        await JSRuntime.InvokeVoidAsync("downloadFile", $"{AppSettings.ApiBaseUrl}/api/theme/css-file", data);
+    }
+
+
+}

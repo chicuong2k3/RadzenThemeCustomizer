@@ -10,11 +10,20 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.5" PrivateAssets="all" />
 		<PackageReference Include="Radzen.Blazor" Version="7.1.0" />
-		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="TimeWarp.State" Version="11.0.3" />
+		<PackageReference Include="TimeWarp.State.Plus" Version="11.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\RadzenThemeCustomizer.Shared\RadzenThemeCustomizer.Shared.csproj" />
+		<ProjectReference Include="..\RadzenThemeCustomizer.Shared\RadzenThemeCustomizer.Shared.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Update="wwwroot\appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\appsettings.Development.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 </Project>

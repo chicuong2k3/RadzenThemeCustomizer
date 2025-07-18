@@ -19,8 +19,8 @@
 
 
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="8px">
-            <RadzenButton Text="Đóng" ButtonStyle="ButtonStyle.Secondary" Size="Radzen.ButtonSize.Medium" Click="@(() => DialogService.Close(false))" Variant="Variant.Flat" />
-            <RadzenButton Text="Lưu thay đổi" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Size="Radzen.ButtonSize.Medium" Variant="Variant.Flat" />
+            <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Secondary" Size="Radzen.ButtonSize.Medium" Click="@(() => DialogService.Close(false))" Variant="Variant.Flat" />
+            <RadzenButton Text="Save" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Size="Radzen.ButtonSize.Medium" Variant="Variant.Flat" />
         </RadzenStack>
 
     </RadzenStack>
@@ -33,8 +33,6 @@
     private List<ThemeOption> predefinedThemes = [
         new ThemeOption { Name = "Material", Value = "material"},
         new ThemeOption { Name = "Material Dark", Value = "material-dark"},
-        new ThemeOption { Name = "Material 3", Value = "material-3"},
-        new ThemeOption { Name = "Material 3 Dark", Value = "material-3-dark"},
         new ThemeOption { Name = "Humanistic", Value = "humanistic"},
         new ThemeOption { Name = "Humanistic Dark", Value = "humanistic-dark"},
         new ThemeOption { Name = "Software", Value = "software"},

@@ -27,7 +27,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var randomTheme = "software";
+        var randomTheme = AppSettings.DefaultBaseTheme;
         var themeName = $"{randomTheme}-{Guid.NewGuid()}";
         var theme = await ThemeManagerService.GetSingleTheme();
         if (theme == null)

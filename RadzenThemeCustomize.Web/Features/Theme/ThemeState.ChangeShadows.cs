@@ -32,6 +32,7 @@ public partial class ThemeState
 
             public override async Task Handle(Action action, CancellationToken cancellationToken)
             {
+                ThemeState.IsLoading = true;
 
                 Dictionary<string, string> shadows = new();
                 foreach (var shadowVariable in ThemeState.ShadowVariables)
@@ -52,6 +53,7 @@ public partial class ThemeState
                 });
                 await _jSRuntime.InvokeVoidAsync("injectCss", css);
 
+                ThemeState.IsLoading = false;
             }
         }
     }

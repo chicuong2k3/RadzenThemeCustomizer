@@ -222,4 +222,16 @@ public class ThemeManagerService
         return cssBytes;
     }
 
+    public async Task<byte[]> GetScssFileAsync(string themeName, string userId)
+    {
+        var theme = await _dbContext.Themes
+            .FirstOrDefaultAsync(t => t.Name == themeName && t.UserId == userId);
+
+        if (theme == null)
+        {
+            return [];
+        }
+
+        return Encoding.UTF8.GetBytes(theme.ScssContent);
+    }
 }

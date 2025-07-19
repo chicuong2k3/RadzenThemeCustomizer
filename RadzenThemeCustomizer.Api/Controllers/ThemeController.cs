@@ -96,4 +96,17 @@ public partial class ThemeController : ControllerBase
 
         return File(bytes, "text/css", "theme.css");
     }
+
+    [HttpPost("scss-file")]
+    public async Task<IActionResult> DownloadScssFile([FromBody] DownloadCssFileRequest request)
+    {
+        var bytes = await _themeManagerService.GetScssFileAsync(request.ThemeName, HttpContext.GetUserId());
+
+        if (bytes == null || bytes.Length == 0)
+        {
+            return NotFound("Theme not found or SCSS file is empty.");
+        }
+
+        return File(bytes, "text/scss", "theme.scss");
+    }
 }

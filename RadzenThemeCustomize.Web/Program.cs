@@ -9,6 +9,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Logging.SetMinimumLevel(LogLevel.None);
+
 builder.Services.AddTimeWarpState();
 
 var tempClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
@@ -21,8 +23,6 @@ builder.Services.AddSingleton(settings!);
 
 builder.Services.AddRadzenComponents();
 builder.Services.AddScoped<ThemeManagerService>();
-
-builder.Services.AddScoped<LayoutEventService>();
 builder.Services.AddScoped<ColorVariableService>();
 
 builder.Services.AddScoped(sp => new HttpClient

@@ -6,6 +6,8 @@ public sealed partial class ThemeState : State<ThemeState>
 {
     public string CurrentTheme { get; private set; } = string.Empty;
 
+    public bool IsLoading { get; private set; }
+
     public string BaseColor { get; private set; } = string.Empty;
     public string PrimaryColor { get; private set; } = string.Empty;
     public string SecondaryColor { get; private set; } = string.Empty;

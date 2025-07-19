@@ -40,6 +40,8 @@ public partial class ThemeState
 
             public override async Task Handle(Action action, CancellationToken cancellationToken)
             {
+                ThemeState.IsLoading = true;
+
                 ThemeState.CurrentTheme = action.ThemeName;
 
                 ThemeState.BaseColor = await _themeManagerService.GetScssVariableAsync(new()
@@ -221,6 +223,8 @@ public partial class ThemeState
                     ThemeName = ThemeState.CurrentTheme
                 });
                 await _jSRuntime.InvokeVoidAsync("injectCss", css);
+
+                ThemeState.IsLoading = false;
             }
         }
 

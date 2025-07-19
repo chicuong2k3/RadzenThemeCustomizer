@@ -11,11 +11,11 @@
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
             <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success">Create new theme</RadzenButton>
             <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Info">Theme list</RadzenButton>
-
             <RadzenText TextStyle="TextStyle.DisplayH6">Current theme: @ThemeState.CurrentTheme</RadzenText>
         </RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
             <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
+            <RadzenButton Click="DownloadScss" ButtonStyle="ButtonStyle.Success">Download SCSS</RadzenButton>
         </RadzenStack>
     </RadzenStack>
 </RadzenHeader>
@@ -23,7 +23,6 @@
 @code {
     private ThemeState ThemeState => GetState<ThemeState>();
     private CreateThemeRequest createThemeRequest = new();
-    private bool isUpdatingTheme = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,7 +45,7 @@
         }
 
         await ThemeState.ChangeTheme(theme.Name);
-
+        StateHasChanged();
     }
 
     private async Task CreateTheme()
@@ -83,5 +82,10 @@
         await JSRuntime.InvokeVoidAsync("downloadFile", $"{AppSettings.ApiBaseUrl}/api/theme/css-file", data);
     }
 
+    private async Task DownloadScss()
+    {
+        var data = new { themeName = ThemeState.CurrentTheme };
 
+        await JSRuntime.InvokeVoidAsync("downloadFile", $"{AppSettings.ApiBaseUrl}/api/theme/scss-file", data);
+    }
 }

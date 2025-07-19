@@ -19,9 +19,8 @@ public class ThemeManagerService
         {
             return await _httpClient.GetFromJsonAsync<ThemeDto>("api/theme/single");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[CreateThemeAsync] Error: {ex.Message}");
             return null;
         }
     }
@@ -40,9 +39,8 @@ public class ThemeManagerService
 
             return await _httpClient.GetFromJsonAsync<PaginationResult<ThemeDto>>("api/theme");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[GetThemesAsync] Error: {ex.Message}");
             return null;
         }
     }
@@ -57,9 +55,8 @@ public class ThemeManagerService
                 Console.WriteLine($"[DeleteThemeAsync] Failed to delete theme. Status code: {response.StatusCode}");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[DeleteThemeAsync] Error: {ex.Message}");
         }
     }
 
@@ -78,9 +75,8 @@ public class ThemeManagerService
                 return null;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[CreateThemeAsync] Error: {ex.Message}");
             return null;
         }
     }
@@ -91,9 +87,8 @@ public class ThemeManagerService
         {
             await _httpClient.PutAsJsonAsync("api/theme", request);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[UpdateThemeAsync] Error: {ex.Message}");
         }
     }
 
@@ -110,9 +105,8 @@ public class ThemeManagerService
                 return await response.Content.ReadAsStringAsync();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[GetThemeCssAsync] Error: {ex.Message}");
         }
 
         return string.Empty;
@@ -131,9 +125,8 @@ public class ThemeManagerService
                 return await response.Content.ReadAsStringAsync();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[GetScssVariableAsync] Error: {ex.Message}");
             return string.Empty;
         }
 
@@ -150,9 +143,8 @@ public class ThemeManagerService
                 return await response.Content.ReadAsByteArrayAsync();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[DownloadCssFileAsync] Error: {ex.Message}");
         }
 
         return Array.Empty<byte>();

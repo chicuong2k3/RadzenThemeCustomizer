@@ -17,7 +17,8 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         builder => builder.WithOrigins(origins)
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .WithExposedHeaders("Content-Disposition"));
 });
 
 JsEngineSwitcher.Current.EngineFactories.AddV8();

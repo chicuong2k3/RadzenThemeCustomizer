@@ -37,6 +37,8 @@ public partial class ThemeState
 
             public override async Task Handle(Action action, CancellationToken cancellationToken)
             {
+                ThemeState.IsLoading = true;
+
                 switch (action.Variable)
                 {
                     case "rz-base":
@@ -74,6 +76,7 @@ public partial class ThemeState
                 });
                 await _jSRuntime.InvokeVoidAsync("injectCss", css);
 
+                ThemeState.IsLoading = false;
             }
         }
     }

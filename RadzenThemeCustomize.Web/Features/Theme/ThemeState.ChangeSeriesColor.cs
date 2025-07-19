@@ -37,6 +37,8 @@ public partial class ThemeState
 
             public override async Task Handle(Action action, CancellationToken cancellationToken)
             {
+                ThemeState.IsLoading = true;
+
                 ThemeState.SeriesColors[action.Variable] = action.Value;
 
                 await _themeManagerService.UpdateThemeAsync(new()
@@ -50,6 +52,7 @@ public partial class ThemeState
                 });
                 await _jSRuntime.InvokeVoidAsync("injectCss", css);
 
+                ThemeState.IsLoading = false;
             }
         }
     }

@@ -1,5 +1,8 @@
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Options;
 using Radzen;
 using RadzenThemeCustomizer.Web;
 using System.Net.Http.Json;
@@ -29,5 +32,6 @@ builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(settings?.ApiBaseUrl ?? throw new ArgumentException("ApiBaseUrl not configured"))
 });
+
 
 await builder.Build().RunAsync();

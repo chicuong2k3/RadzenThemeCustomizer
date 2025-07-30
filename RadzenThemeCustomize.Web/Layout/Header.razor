@@ -6,6 +6,8 @@
 @inject AppSettings AppSettings
 @inject IJSRuntime JSRuntime
 
+
+
 <RadzenHeader Style="padding: 16px; box-shadow: none;">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
@@ -45,6 +47,7 @@
         }
 
         await ThemeState.ChangeTheme(theme.Name);
+
         StateHasChanged();
     }
 

@@ -4,9 +4,9 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<RunAOTCompilation>true</RunAOTCompilation>
-		<WasmStripILAfterAOT>true</WasmStripILAfterAOT>
+		<RunAOTCompilation>false</RunAOTCompilation>
 		<WasmEnableSIMD>false</WasmEnableSIMD>
+		<WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
 		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 

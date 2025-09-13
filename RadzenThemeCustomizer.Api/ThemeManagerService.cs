@@ -200,7 +200,16 @@ public class ThemeManagerService
 
         if (newLines.Count > 0)
         {
-            scssContent += Environment.NewLine + string.Join(Environment.NewLine, newLines);
+            var themeMatch = Regex.Match(scssContent, @"(\$theme-name\s*:[^;]+;)");
+            if (themeMatch.Success)
+            {
+                int insertPos = themeMatch.Index + themeMatch.Length;
+                scssContent = scssContent.Insert(insertPos, Environment.NewLine + string.Join(Environment.NewLine, newLines));
+            }
+            else
+            {
+                scssContent += Environment.NewLine + string.Join(Environment.NewLine, newLines);
+            }
         }
 
         return scssContent;

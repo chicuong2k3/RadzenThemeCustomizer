@@ -107,7 +107,6 @@ public sealed partial class ThemeState : State<ThemeState>
         { "rz-border-disabled", string.Empty }
     };
 
-
     public override void Initialize()
     {
     }

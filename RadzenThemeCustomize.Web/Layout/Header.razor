@@ -11,13 +11,21 @@
 <RadzenHeader Style="padding: 16px; box-shadow: none;">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
-            <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success">Create new theme</RadzenButton>
-            <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Info">Theme list</RadzenButton>
+            <RadzenButton Click="CreateTheme" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat">
+                Create new theme
+            </RadzenButton>
+            <RadzenButton Click="ViewThemeList" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat">
+                Theme list
+            </RadzenButton>
             <RadzenText TextStyle="TextStyle.DisplayH6">Current theme: @ThemeState.CurrentTheme</RadzenText>
         </RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
-            <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Success">Download CSS</RadzenButton>
-            <RadzenButton Click="DownloadScss" ButtonStyle="ButtonStyle.Success">Download SCSS</RadzenButton>
+            <RadzenButton Click="DownloadCss" ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat">
+                Download CSS
+            </RadzenButton>
+            <RadzenButton Click="DownloadScss" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat">
+                Download SCSS
+            </RadzenButton>
         </RadzenStack>
     </RadzenStack>
 </RadzenHeader>

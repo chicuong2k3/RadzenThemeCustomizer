@@ -26,17 +26,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="scss\*.scss">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</None>
-		<None Include="scss\components\blazor\*.scss">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\RadzenThemeCustomizer.Shared\RadzenThemeCustomizer.Shared.csproj" />
 	</ItemGroup>
 </Project>

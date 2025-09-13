@@ -78,9 +78,12 @@ $grid-detail-template-border-radius: 0 !default;
 $grid-detail-template-padding: 0 !default;
 $grid-detail-template-background-color: var(--rz-base-background-color) !default;
 $grid-loading-indicator-color: currentColor !default;
-$grid-loading-indicator-background-color: rgba(var(--rz-base-600), 0.5) !default;
+$grid-loading-indicator-background-color: var(--rz-base-600) !default;
+$grid-loading-indicator-background-opacity: 0.5 !default;
 $grid-frozen-cell-border: $grid-cell-border !default;
 $grid-frozen-cell-background-color: $grid-header-background-color !default;
+$grid-frozen-stripe-background-color: var(--rz-grid-stripe-background-color) !default;
+$grid-frozen-stripe-odd-background-color: var(--rz-grid-stripe-odd-background-color) !default;
 $grid-state-transition: var(--rz-transition-all) !default;
 $grid-group-header-padding: 0.5rem !default;
 $grid-group-header-gap: 0.5rem !default;
@@ -418,11 +421,17 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
         > td {
             background-color: var(--rz-grid-stripe-background-color);
         }
+        > td.rz-frozen-cell {
+            background-color: var(--rz-grid-frozen-stripe-background-color);
+        }
       }
 
       &:nth-child(odd) {
         > td {
           background-color: var(--rz-grid-stripe-odd-background-color);
+        }
+        > td.rz-frozen-cell {
+            background-color: var(--rz-grid-frozen-stripe-odd-background-color);
         }
       }
     }
@@ -678,7 +687,6 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
 
           &:after {
             z-index: -2;
-            background-color: var(--rz-grid-frozen-cell-background-color);
           }
         }
 
@@ -686,7 +694,6 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
         &.rz-frozen-cell-right-inner {
           &:before {
             z-index: -2;
-            background-color: var(--rz-grid-frozen-cell-background-color);
           }
 
           &:after {
@@ -698,6 +705,10 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
       &.rz-state-highlight {
         > td {
           background-color: var(--rz-grid-selected-background-color);
+        }
+
+        > td.rz-frozen-cell {
+          background-color: var(--rz-grid-background-color);
 
           &.rz-frozen-cell-left,
           &.rz-frozen-cell-left-inner {
@@ -727,6 +738,10 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
         > td {
           background-color: var(--rz-grid-cell-focus-background-color);
           color: var(--rz-grid-cell-focus-color);
+        }
+
+        > td.rz-frozen-cell {
+          background-color: var(--rz-grid-background-color);
 
           &.rz-frozen-cell-left,
           &.rz-frozen-cell-left-inner {
@@ -767,7 +782,11 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
         &:not(.rz-state-highlight) {
           > td {
             background-color: var(--rz-grid-hover-background-color);
+          }
 
+          > td.rz-frozen-cell {
+            background-color: var(--rz-grid-background-color);
+            
             &.rz-frozen-cell-left,
             &.rz-frozen-cell-left-inner {
               &:before {
@@ -892,6 +911,7 @@ $column-draggable-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.1) !default;
   position: absolute;
   inset: 0;
   background-color: var(--rz-grid-loading-indicator-background-color);
+  opacity: var(--rz-grid-loading-indicator-background-opacity);
   z-index: 2;
 }
 
